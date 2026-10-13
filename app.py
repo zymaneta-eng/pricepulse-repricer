@@ -452,9 +452,13 @@ with col_left_65:
 
         # On-Chart Annotations: Pointer flags marking price drops
         last_d = hist_active["date"].iloc[-1]
+        competitor_lowest = min(active_comp_a, active_comp_b)
+        diff_to_comp = round(active_our_price - competitor_lowest, 2)
+        ann_text = f"🚨 Competitor Undercut (-${abs(diff_to_comp):.2f})" if diff_to_comp > 0 else "✓ Buy-Box Parity"
+
         fig.add_annotation(
-            x=last_d, y=active_comp_b,
-            text="🚨 Competitor Undercut (-$8.50)",
+            x=last_d, y=competitor_lowest,
+            text=ann_text,
             showarrow=True,
             arrowhead=2,
             arrowcolor="#EF4444",
@@ -619,7 +623,7 @@ with col_right_35:
     <div style="background: rgba(245, 158, 11, 0.05); border: 1px solid #F59E0B; border-radius: 8px; padding: 10px 12px; margin-bottom: 0.55rem;">
       <div style="font-size: 0.68rem; font-family: 'Space Mono'; color: #F59E0B; font-weight: 700; margin-bottom: 4px;">STRATEGIC DECISION LOGIC</div>
       <div style="font-size: 0.74rem; color: #CBD5E1; line-height: 1.4; margin-bottom: 8px;">
-        Strategic logic: Under-cut BestBuy by <strong>${undercut_numeric:.2f}</strong> to recover #1 buy-box spot while staying <strong>+${margin_gain_usd:.2f}</strong> above your margin safety floor ($143.99).
+        Strategic logic: Under-cut {"BestBuy" if active_comp_b <= active_comp_a else "Amazon"} by <strong>${undercut_numeric:.2f}</strong> to recover #1 buy-box spot while staying <strong>+${margin_gain_usd:.2f}</strong> above your margin safety floor (${floor_safety_val:.2f}).
       </div>
       <div style="display: flex; justify-content: space-between; align-items: center; background: #070B16; border: 1px solid rgba(245, 158, 11, 0.4); border-radius: 6px; padding: 6px 10px;">
         <div>
