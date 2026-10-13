@@ -247,22 +247,24 @@
     <div class="flex items-center gap-2">
       <button onclick="triggerSimulatedReprice('global')" title="Runs sandbox Shopify API pricing push (Simulated)" class="relative group flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-indigo-600 to-[#38BDF8] hover:from-indigo-500 hover:to-sky-400 text-white font-bold rounded-lg text-xs transition shadow-md shadow-indigo-500/20 active:scale-95">
         <i data-lucide="zap" class="w-3.5 h-3.5"></i>
-        <span id="btn-reprice-text">⚡ Execute AI Repricer</span>
-      </button>
-      <button onclick="triggerTelegramAlert()" title="Dispatches test alert payload to Telegram channel" class="flex items-center gap-1 px-3 py-1.5 bg-[#0B0F19] hover:bg-[#1F293D] border border-[#1F293D] text-[#94A3B8] hover:text-[#F8FAFC] rounded-lg text-xs transition">
-        <i data-lucide="send" class="w-3.5 h-3.5 text-sky-400"></i>
-        <span>Telegram</span>
+      <button onclick="triggerSlackAlert()" title="Dispatches real-time webhook alert to Slack (#pricing-alerts channel)" class="flex items-center gap-1.5 px-3 py-1.5 bg-[#0B0F19] hover:bg-[#1F293D] border border-[#1F293D] text-[#94A3B8] hover:text-[#F8FAFC] rounded-lg text-xs transition">
+        <i data-lucide="message-square" class="w-3.5 h-3.5 text-[#38BDF8]"></i>
+        <span>Slack Alert</span>
       </button>
     </div>
   </div>
 
-  <!-- 4. DYNAMIC STATUS NOTIFICATION (EMERALD TRANSLUCENT BANNER) -->
-  <div class="flex items-center justify-between px-3.5 py-1.5 bg-emerald-950/30 border border-emerald-500/30 rounded-lg text-xs text-emerald-400 mb-2.5 font-medium">
+  <!-- 4. DEMO SANDBOX BANNER -->
+  <div class="flex flex-wrap items-center justify-between px-3.5 py-2 bg-indigo-950/30 border border-indigo-500/40 rounded-lg text-xs text-[#CBD5E1] mb-2.5 font-medium">
     <div class="flex items-center gap-2">
-      <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
-      <span>Successfully resolved price conflicts for 16 Melbourne-active products!</span>
+      <span class="px-2 py-0.5 bg-indigo-600/40 border border-indigo-400/50 text-indigo-300 text-[10px] font-mono font-bold rounded uppercase">
+        Live Demo Sandbox
+      </span>
+      <span>
+        Отображается выборка из <strong>16 верифицированных моделей</strong> по 5 брендам (Apple: 4, Samsung: 3, Oppo: 3, Realme: 3, Vivo: 3). В продакшене алгоритм масштабируется на <strong>50,000+ товаров</strong> магазина через Shopify GraphQL и Amazon SP-API.
+      </span>
     </div>
-    <span class="text-[11px] font-mono text-emerald-500/80">Audit Hash: #REP-88219</span>
+    <span class="text-[11px] font-mono text-indigo-400 hidden sm:inline-block">Ground-Truth API: 16 SKUs</span>
   </div>
 
   <!-- 5. MAIN WORKSTATION: TWO-COLUMN SPLIT-VIEW (65% / 35%) -->
@@ -937,9 +939,10 @@
       }, 1200);
     }
 
-    function triggerTelegramAlert() {
-      showToast(`📡 Telegram Alert Dispatched: Active price drops sent to sellers channel.`, 'info');
-      addLog(`[DISPATCH] Sent high-priority arbitrage telegram alert webhook payload`, 'info');
+    function triggerSlackAlert() {
+      const p = PRODUCTS.find(x => x.sku === currentSelectedSku);
+      showToast(`💬 Slack Webhook: Buy-Box alert for ${p.sku} dispatched to #pricing-alerts!`, 'info');
+      addLog(`[SLACK WEBHOOK 200] Alert for ${p.sku} successfully sent to #pricing-alerts channel`, 'info');
     }
 
     // Toast Notification helper
