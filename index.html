@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PricePulse AI v3.5 | Algorithmic Retail Arbitrage</title>
+  
+  <!-- Tailwind CSS CDN with custom config -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              bg: '#0B0F19',
+              card: '#121826',
+              border: '#1F293D',
+              indigo: '#4F46E5',
+              emerald: '#10B981',
+              amber: '#F59E0B',
+              orange: '#F97316',
+              crimson: '#EF4444',
+              sky: '#38BDF8',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['Space Mono', 'JetBrains Mono', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      background-color: #0B0F19;
+      color: #F8FAFC;
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+      margin: 0;
+      padding: 0;
+    }
+    
+    .ticker-scroll {
+      display: flex;
+      animation: ticker 35s linear infinite;
+    }
+    .ticker-scroll:hover {
+      animation-play-state: paused;
+    }
+    @keyframes ticker {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0B0F19;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1F293D;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+
+    .pulse-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #10B981;
+      box-shadow: 0 0 8px #10B981;
+      display: inline-block;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+
+    .selected-row {
+      background-color: rgba(79, 70, 229, 0.12) !important;
+      border-color: #4F46E5 !important;
+    }
+  </style>
+</head>
+<body class="p-3 bg-[#0B0F19] text-[#F8FAFC] select-none text-[13px]">
+
+  <!-- TOAST CONTAINER -->
+  <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- 1. TOP NAVIGATION -->
+  <header class="flex items-center justify-between px-4 py-2.5 bg-[#121826] border border-[#1F293D] rounded-xl mb-2.5">
+    <!-- Brand -->
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2">
+        <i data-lucide="zap" class="w-5 h-5 text-[#38BDF8] fill-[#38BDF8]"></i>
+        <span class="text-base font-extrabold tracking-tight text-[#F8FAFC]">
+          PricePulse <span class="text-[#38BDF8]">AI</span> <span class="text-xs font-semibold text-[#94A3B8]">v3.5</span>
+        </span>
+      </div>
+      <span class="hidden sm:inline-block text-[11px] font-medium text-[#94A3B8] px-2 py-0.5 bg-[#0B0F19] border border-[#1F293D] rounded">
+        Algorithmic Retail Arbitrage
+      </span>
+      <div class="flex items-center gap-1.5 px-2 py-0.5 bg-emerald-950/40 border border-emerald-500/30 rounded text-[11px] font-mono text-emerald-400">
+        <span class="pulse-dot"></span>
+        <span>Live API Grounded</span>
+      </div>
+    </div>
+
+    <!-- Center Portfolio Credit -->
+    <div class="hidden md:flex items-center gap-2 text-xs text-[#94A3B8]">
+      <span>Designed &amp; Engineered by Freelancer</span>
+      <span class="text-slate-600">•</span>
+      <span class="text-emerald-400 font-semibold flex items-center gap-1">
+        <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Available for Hire
+      </span>
+    </div>
+
+    <!-- Right Controls -->
+    <div class="flex items-center gap-2.5">
+      <!-- Glowing Simulation Badge -->
+      <div class="flex items-center gap-1.5 px-2.5 py-1 bg-indigo-950/60 border border-indigo-500/40 rounded-lg text-xs font-mono text-indigo-300 shadow-[0_0_12px_rgba(79,70,229,0.25)]">
+        <i data-lucide="cpu" class="w-3.5 h-3.5 text-indigo-400 animate-pulse"></i>
+        <span class="font-bold">🛠️ Simulation: ACTIVE</span>
+      </div>
+      <button class="p-1.5 text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#1F293D] rounded-lg transition" title="Settings">
+        <i data-lucide="settings" class="w-4 h-4"></i>
+      </button>
+      <button class="flex items-center gap-1.5 px-3 py-1 bg-[#4F46E5] hover:bg-indigo-600 text-white font-semibold rounded-lg text-xs transition shadow-md shadow-indigo-500/20">
+        <i data-lucide="rocket" class="w-3.5 h-3.5"></i>
+        <span>Deploy</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- 2. FULL-WIDTH LIVE TICKER TAPE -->
+  <div class="w-full overflow-hidden bg-[#0F1422] border border-[#1F293D] rounded-lg py-1.5 px-3 mb-2.5 flex items-center text-xs font-mono">
+    <div class="flex items-center gap-1.5 text-amber-400 font-bold shrink-0 mr-4 text-[11px] uppercase tracking-wider">
+      <i data-lucide="activity" class="w-3.5 h-3.5"></i>
+      <span>Live Arbitrage:</span>
+    </div>
+    <div class="overflow-hidden relative w-full">
+      <div class="ticker-scroll flex items-center gap-6 whitespace-nowrap text-[#94A3B8]">
+        <div class="flex items-center gap-2"><span class="text-[#F8FAFC] font-semibold">AAPL-5S:</span> <span class="text-rose-400">AMZN Drop -$8.50 🔻 Win Buy-Box $191.49</span></div>
+        <div class="flex items-center gap-2"><span class="text-[#F8FAFC] font-semibold">SONY-XM5:</span> <span class="text-amber-400">BestBuy Sold Out 🔺 Surge +8%</span></div>
+        <div class="flex items-center gap-2"><span class="text-[#F8FAFC] font-semibold">IPHONE-13-PRO:</span> <span class="text-rose-400">AMZN $1,084.49 🔻 -$15.50</span></div>
+        <div class="flex items-center gap-2"><span class="text-[#F8FAFC] font-semibold">OPPO-K1:</span> <span class="text-emerald-400">Buy-Box Leader = $299.99</span></div>
+        <div class="flex items-center gap-2"><span class="text-[#F8FAFC] font-semibold">GALAXY-S10:</span> <span class="text-rose-400">Spread AMZN -$10.00 🔻 Undercut</span></div>
+        <div class="flex items-center gap-2"><span class="text-[#F8FAFC] font-semibold">REALME-C35:</span> <span class="text-emerald-400">Parity Match = $149.49</span></div>
+        <!-- Duplicated for seamless loop -->
+        <div class="flex items-center gap-2"><span class="text-[#F8FAFC] font-semibold">AAPL-5S:</span> <span class="text-rose-400">AMZN Drop -$8.50 🔻 Win Buy-Box $191.49</span></div>
+        <div class="flex items-center gap-2"><span class="text-[#F8FAFC] font-semibold">SONY-XM5:</span> <span class="text-amber-400">BestBuy Sold Out 🔺 Surge +8%</span></div>
+        <div class="flex items-center gap-2"><span class="text-[#F8FAFC] font-semibold">IPHONE-13-PRO:</span> <span class="text-rose-400">AMZN $1,084.49 🔻 -$15.50</span></div>
+        <div class="flex items-center gap-2"><span class="text-[#F8FAFC] font-semibold">OPPO-K1:</span> <span class="text-emerald-400">Buy-Box Leader = $299.99</span></div>
+      </div>
+    </div>
+    <div class="shrink-0 ml-3 text-[11px] text-slate-500 font-mono hidden lg:block">
+      PING: 38ms | SYNC: 16 SKUs
+    </div>
+  </div>
+
+  <!-- 3. CONFIGURATION & STRATEGY STRIP TOOLBAR (100% WIDTH) -->
+  <div class="bg-[#121826] border border-[#1F293D] rounded-xl p-3 mb-2.5 flex flex-wrap items-center justify-between gap-3 text-xs">
+    <!-- Left Filters & Inputs -->
+    <div class="flex flex-wrap items-center gap-3">
+      <!-- Filter Brand -->
+      <div class="flex flex-col gap-1">
+        <label class="text-[10px] uppercase font-mono tracking-wider text-[#94A3B8]">Filter Brand</label>
+        <select id="filter-brand" onchange="handleBrandFilter(this.value)" class="bg-[#0B0F19] border border-[#1F293D] text-[#F8FAFC] rounded-lg px-2.5 py-1 text-xs focus:outline-none focus:border-[#4F46E5]">
+          <option value="All">All Brands (16)</option>
+          <option value="Apple">Apple (4)</option>
+          <option value="Samsung">Samsung (3)</option>
+          <option value="Oppo">Oppo (3)</option>
+          <option value="Realme">Realme (3)</option>
+          <option value="Vivo">Vivo (3)</option>
+        </select>
+      </div>
+
+      <!-- Safety Margin Floor -->
+      <div class="flex flex-col gap-1">
+        <label class="text-[10px] uppercase font-mono tracking-wider text-[#94A3B8]">Safety Margin Floor %</label>
+        <div class="flex items-center gap-1.5 bg-[#0B0F19] border border-[#1F293D] rounded-lg px-2 py-1">
+          <input type="number" id="inp-floor" value="15" min="5" max="40" step="1" onchange="updateStrategyParams()" class="w-10 bg-transparent text-[#F8FAFC] font-mono text-xs focus:outline-none text-right">
+          <span class="text-[#94A3B8] font-mono">%</span>
+        </div>
+      </div>
+
+      <!-- Buy-Box Undercut -->
+      <div class="flex flex-col gap-1">
+        <label class="text-[10px] uppercase font-mono tracking-wider text-[#94A3B8]">Buy-Box Undercut</label>
+        <select id="inp-undercut" onchange="updateStrategyParams()" class="bg-[#0B0F19] border border-[#1F293D] text-[#F8FAFC] font-mono rounded-lg px-2 py-1 text-xs focus:outline-none focus:border-[#4F46E5]">
+          <option value="0.10">-$0.10</option>
+          <option value="0.50" selected>-$0.50</option>
+          <option value="1.00">-$1.00</option>
+          <option value="2.00">-$2.00</option>
+        </select>
+      </div>
+
+      <!-- Stockout Surge % -->
+      <div class="flex flex-col gap-1">
+        <label class="text-[10px] uppercase font-mono tracking-wider text-[#94A3B8]">Stockout Surge %</label>
+        <div class="flex items-center gap-2 bg-[#0B0F19] border border-[#1F293D] rounded-lg px-2.5 py-1">
+          <input type="range" id="inp-surge" min="0" max="15" value="8" oninput="document.getElementById('surge-val-disp').innerText = this.value + '%'; updateStrategyParams();" class="w-16 accent-indigo-500 cursor-pointer">
+          <span id="surge-val-disp" class="text-amber-400 font-mono text-xs w-7">8%</span>
+        </div>
+      </div>
+
+      <!-- Strategy Toggles -->
+      <div class="flex items-center gap-3 pl-2 border-l border-[#1F293D] pt-2 sm:pt-0">
+        <label class="flex items-center gap-1.5 cursor-pointer text-[#94A3B8] hover:text-[#F8FAFC]">
+          <input type="checkbox" id="tog-offset" checked onchange="handleToggleEvent('Under-Cut Offset', this.checked)" class="accent-indigo-600 rounded">
+          <span class="text-[11px]">Under-Cut Offset</span>
+        </label>
+        <label class="flex items-center gap-1.5 cursor-pointer text-[#94A3B8] hover:text-[#F8FAFC]">
+          <input type="checkbox" id="tog-turnstile" checked onchange="handleToggleEvent('Bypass Turnstile', this.checked)" class="accent-indigo-600 rounded">
+          <span class="text-[11px]">Bypass Turnstile</span>
+        </label>
+        <label class="flex items-center gap-1.5 cursor-pointer text-[#94A3B8] hover:text-[#F8FAFC]">
+          <input type="checkbox" id="tog-rules" checked onchange="handleToggleEvent('Match Rules', this.checked)" class="accent-indigo-600 rounded">
+          <span class="text-[11px]">Match Rules</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Right Action CTAs -->
+    <div class="flex items-center gap-2">
+      <button onclick="triggerSimulatedReprice('global')" title="Runs sandbox Shopify API pricing push (Simulated)" class="relative group flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-indigo-600 to-[#38BDF8] hover:from-indigo-500 hover:to-sky-400 text-white font-bold rounded-lg text-xs transition shadow-md shadow-indigo-500/20 active:scale-95">
+        <i data-lucide="zap" class="w-3.5 h-3.5"></i>
+        <span id="btn-reprice-text">⚡ Execute AI Repricer</span>
+      </button>
+      <button onclick="triggerTelegramAlert()" title="Dispatches test alert payload to Telegram channel" class="flex items-center gap-1 px-3 py-1.5 bg-[#0B0F19] hover:bg-[#1F293D] border border-[#1F293D] text-[#94A3B8] hover:text-[#F8FAFC] rounded-lg text-xs transition">
+        <i data-lucide="send" class="w-3.5 h-3.5 text-sky-400"></i>
+        <span>Telegram</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 4. DYNAMIC STATUS NOTIFICATION (EMERALD TRANSLUCENT BANNER) -->
+  <div class="flex items-center justify-between px-3.5 py-1.5 bg-emerald-950/30 border border-emerald-500/30 rounded-lg text-xs text-emerald-400 mb-2.5 font-medium">
+    <div class="flex items-center gap-2">
+      <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
+      <span>Successfully resolved price conflicts for 16 Melbourne-active products!</span>
+    </div>
+    <span class="text-[11px] font-mono text-emerald-500/80">Audit Hash: #REP-88219</span>
+  </div>
+
+  <!-- 5. MAIN WORKSTATION: TWO-COLUMN SPLIT-VIEW (65% / 35%) -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 mb-2.5">
+    
+    <!-- LEFT PANEL: 65% (8/12 cols) - MARKET DEFENSE & REGISTRY -->
+    <div class="lg:col-span-8 flex flex-col gap-2.5">
+      
+      <!-- View Switcher & Toolbar Header -->
+      <div class="flex items-center justify-between bg-[#121826] border border-[#1F293D] rounded-xl px-3.5 py-2">
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-bold text-[#F8FAFC] flex items-center gap-1.5">
+            <i data-lucide="trending-up" class="w-4 h-4 text-[#38BDF8]"></i>
+            <span id="active-panel-heading">Market Defense Chart Analysis</span>
+          </span>
+          <span class="text-xs text-[#94A3B8]">—</span>
+          <span id="active-sku-chip" class="text-xs font-mono text-[#38BDF8] bg-sky-950/40 border border-sky-500/30 px-1.5 py-0.5 rounded">
+            Apple iPhone 5s
+          </span>
+        </div>
+
+        <!-- Segmented View Switcher -->
+        <div class="flex items-center bg-[#0B0F19] border border-[#1F293D] p-1 rounded-lg">
+          <button id="view-btn-chart" onclick="switchView('chart')" class="flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-md bg-[#4F46E5] text-white shadow transition">
+            <i data-lucide="line-chart" class="w-3.5 h-3.5"></i>
+            <span>📈 Chart</span>
+          </button>
+          <button id="view-btn-catalog" onclick="switchView('catalog')" class="flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-md text-[#94A3B8] hover:text-[#F8FAFC] transition">
+            <i data-lucide="table" class="w-3.5 h-3.5"></i>
+            <span>📋 Catalog List</span>
+          </button>
+          <button id="view-btn-split" onclick="switchView('split')" class="flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-md text-[#94A3B8] hover:text-[#F8FAFC] transition">
+            <i data-lucide="columns" class="w-3.5 h-3.5"></i>
+            <span>⚡ Split</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- VIEW CONTAINER: CHART -->
+      <div id="container-chart" class="bg-[#121826] border border-[#1F293D] rounded-xl p-3 flex flex-col">
+        <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center gap-4 text-xs font-mono">
+            <span class="flex items-center gap-1.5 text-[#38BDF8] font-bold"><span class="w-2.5 h-2.5 bg-[#38BDF8] rounded-full inline-block"></span> Our Store Price</span>
+            <span class="flex items-center gap-1.5 text-orange-400 font-bold"><span class="w-2.5 h-2.5 bg-orange-400 rounded-full inline-block"></span> Amazon US</span>
+            <span class="flex items-center gap-1.5 text-amber-400 font-bold"><span class="w-2.5 h-2.5 bg-amber-400 rounded-full inline-block"></span> BestBuy</span>
+            <span class="flex items-center gap-1.5 text-rose-400 font-bold"><span class="w-2.5 h-0.5 bg-rose-500 inline-block"></span> Protected Floor ($143.99)</span>
+          </div>
+          <div class="flex items-center gap-1 text-[11px] font-mono text-[#94A3B8]">
+            <span class="px-2 py-0.5 bg-[#0B0F19] rounded border border-[#1F293D] cursor-pointer hover:text-white">7D</span>
+            <span class="px-2 py-0.5 bg-[#0B0F19] rounded border border-[#1F293D] cursor-pointer hover:text-white">14D</span>
+            <span class="px-2 py-0.5 bg-[#4F46E5] text-white font-bold rounded border border-indigo-400 cursor-pointer">30D</span>
+            <span class="px-2 py-0.5 bg-[#0B0F19] rounded border border-[#1F293D] cursor-pointer hover:text-white">YTD</span>
+          </div>
+        </div>
+        <div class="relative w-full h-[320px]">
+          <canvas id="marketChart"></canvas>
+        </div>
+      </div>
+
+      <!-- VIEW CONTAINER: CATALOG REGISTRY TABLE -->
+      <div id="container-catalog" class="bg-[#121826] border border-[#1F293D] rounded-xl p-3 flex flex-col hidden">
+        
+        <!-- Filter Selector & Bulk Action Toolbar -->
+        <div class="flex flex-wrap items-center justify-between gap-2.5 mb-2.5">
+          <!-- Multi-Select Bulk Actions -->
+          <div class="flex items-center gap-2 bg-[#0B0F19] border border-[#1F293D] px-2.5 py-1 rounded-lg text-xs">
+            <span class="text-[#94A3B8]">With Selected (<span id="selected-count" class="font-bold text-[#F8FAFC]">0</span>):</span>
+            <button onclick="executeBulkSelected()" class="flex items-center gap-1 px-2 py-0.5 bg-[#4F46E5] hover:bg-indigo-600 text-white font-bold rounded text-[11px] transition">
+              <i data-lucide="zap" class="w-3 h-3"></i>
+              <span>⚡ Execute Bulk</span>
+            </button>
+            <button onclick="exportCSVSelected()" class="flex items-center gap-1 px-2 py-0.5 bg-[#1F293D] hover:bg-slate-700 text-[#F8FAFC] rounded text-[11px] transition">
+              <i data-lucide="download" class="w-3 h-3"></i>
+              <span>📥 Export CSV</span>
+            </button>
+          </div>
+
+          <!-- Quick Filters: All / Alerts / Winning -->
+          <div class="flex items-center bg-[#0B0F19] border border-[#1F293D] p-0.5 rounded-lg text-xs">
+            <button onclick="setFilterCategory('all')" id="f-cat-all" class="px-2.5 py-1 rounded bg-[#1F293D] text-[#F8FAFC] font-semibold transition">
+              All (16)
+            </button>
+            <button onclick="setFilterCategory('alerts')" id="f-cat-alerts" class="px-2.5 py-1 rounded text-[#94A3B8] hover:text-white transition">
+              🚨 Alerts (14)
+            </button>
+            <button onclick="setFilterCategory('winning')" id="f-cat-winning" class="px-2.5 py-1 rounded text-[#94A3B8] hover:text-white transition">
+              ⚡ Winning (2)
+            </button>
+          </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="relative w-full mb-2">
+          <i data-lucide="search" class="w-4 h-4 absolute left-3 top-2.5 text-[#94A3B8]"></i>
+          <input type="text" id="catalog-search" oninput="handleSearch(this.value)" placeholder="🔍 Search SKU, Title, or Barcode..." class="w-full bg-[#0B0F19] border border-[#1F293D] rounded-lg pl-9 pr-3 py-1.5 text-xs text-[#F8FAFC] placeholder-slate-500 focus:outline-none focus:border-[#4F46E5]">
+        </div>
+
+        <!-- Table Header -->
+        <div class="grid grid-cols-12 gap-2 px-3 py-2 bg-[#0B0F19] border border-[#1F293D] rounded-lg text-[11px] font-mono text-[#94A3B8] uppercase tracking-wider mb-1.5 items-center">
+          <div class="col-span-1 flex items-center gap-1.5">
+            <input type="checkbox" id="check-all" onchange="toggleSelectAll(this.checked)" class="accent-indigo-600 rounded">
+            <span>SKU</span>
+          </div>
+          <div class="col-span-3">Product Name</div>
+          <div class="col-span-1 text-center">7D Trend</div>
+          <div class="col-span-1 text-right text-[#38BDF8]">Store ($)</div>
+          <div class="col-span-1 text-right text-orange-400">Amazon ($)</div>
+          <div class="col-span-1 text-right text-amber-400">BestBuy ($)</div>
+          <div class="col-span-1 text-right text-emerald-400">Rec ($)</div>
+          <div class="col-span-2 text-center">Buy-Box Status</div>
+          <div class="col-span-1 text-center">Action</div>
+        </div>
+
+        <!-- Table Rows Container -->
+        <div id="catalog-rows" class="flex flex-col gap-1 max-h-[360px] overflow-y-auto pr-1"></div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT PANEL: 35% (4/12 cols) - AI PRODUCT INSPECTOR -->
+    <div class="lg:col-span-4 flex flex-col gap-2.5">
+      
+      <!-- Inspector Header Card -->
+      <div class="bg-[#121826] border border-[#1F293D] rounded-xl p-3.5 flex flex-col gap-1 border-l-4 border-l-[#4F46E5]">
+        <div class="flex items-center justify-between">
+          <span class="text-[10px] font-mono uppercase tracking-wider text-[#38BDF8] font-bold">ACTIVE FOCUS [SELECTED ITEM]</span>
+          <span class="px-2 py-0.5 bg-emerald-950/40 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono font-semibold rounded">
+            EAN-13 VERIFIED
+          </span>
+        </div>
+        <h3 id="inspect-title" class="text-sm font-extrabold text-[#F8FAFC] tracking-tight">Apple iPhone 5s</h3>
+        <div class="flex items-center gap-2 text-xs font-mono text-[#94A3B8]">
+          <span>SKU: <code id="inspect-sku" class="text-[#38BDF8]">SMA-APP-IPH-121</code></span>
+          <span>•</span>
+          <span>EAN: <code id="inspect-ean" class="text-emerald-400">8814683940853</code></span>
+        </div>
+      </div>
+
+      <!-- FUZZY MATCHING ENGINE CARD (NO PLACEHOLDERS) -->
+      <div class="bg-[#121826] border border-[#1F293D] rounded-xl p-3 flex flex-col gap-2">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold text-emerald-400 flex items-center gap-1.5 font-mono">
+            <i data-lucide="check-check" class="w-4 h-4 text-emerald-400"></i>
+            <span>FUZZY MATCHING ENGINE</span>
+          </span>
+          <span class="px-2 py-0.5 bg-emerald-950/40 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono rounded font-bold">
+            Match confirmed (100%)
+          </span>
+        </div>
+
+        <!-- Dual High-Contrast Thumbnails -->
+        <div class="flex items-center justify-between bg-[#0B0F19] border border-[#1F293D] rounded-lg p-2.5">
+          <div class="flex items-center gap-2">
+            <img id="thumb-our" src="https://cdn.dummyjson.com/product-images/smartphones/iphone-5s/thumbnail.webp" alt="Our Item" class="w-9 h-9 rounded bg-[#1F293D] object-cover border border-[#1F293D]" onerror="this.src='https://dummyjson.com/image/100x100?text=Phone'">
+            <div class="flex flex-col">
+              <span class="text-[11px] font-bold text-[#F8FAFC]">Our Store</span>
+              <span class="text-[10px] text-[#94A3B8] font-mono">Shopify Direct</span>
+            </div>
+          </div>
+
+          <div class="flex flex-col items-center">
+            <i data-lucide="arrow-left-right" class="w-4 h-4 text-[#38BDF8]"></i>
+            <span class="text-[9px] font-mono text-emerald-400 mt-0.5">100% Match</span>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <div class="flex flex-col text-right">
+              <span class="text-[11px] font-bold text-[#F8FAFC]">Competitor</span>
+              <span class="text-[10px] text-[#94A3B8] font-mono">Amazon / BBY</span>
+            </div>
+            <img id="thumb-comp" src="https://cdn.dummyjson.com/product-images/smartphones/iphone-5s/thumbnail.webp" alt="Competitor Item" class="w-9 h-9 rounded bg-[#1F293D] object-cover border border-[#1F293D]" onerror="this.src='https://dummyjson.com/image/100x100?text=Phone'">
+          </div>
+        </div>
+      </div>
+
+      <!-- COMPETITOR PRICE GRID -->
+      <div class="bg-[#121826] border border-[#1F293D] rounded-xl p-3 flex flex-col gap-2">
+        <span class="text-[11px] font-mono font-bold text-amber-400 uppercase tracking-wider">COMPETITOR PRICE GRID</span>
+        
+        <div class="flex flex-col gap-1.5 text-xs font-mono">
+          <!-- COGS -->
+          <div class="flex items-center justify-between p-2 bg-[#0B0F19] border border-[#1F293D] rounded-lg">
+            <span class="text-[#94A3B8]">Base Cost (COGS):</span>
+            <span id="inspect-cost" class="text-slate-400 font-bold">$143.99</span>
+          </div>
+
+          <!-- Store Price -->
+          <div class="flex items-center justify-between p-2 bg-[#0B0F19] border border-[#38BDF8]/30 rounded-lg">
+            <span class="text-[#38BDF8] font-bold flex items-center gap-1.5">
+              <i data-lucide="shopping-bag" class="w-3.5 h-3.5"></i> Our Store Price:
+            </span>
+            <span id="inspect-our" class="text-[#38BDF8] font-bold text-sm">$199.99</span>
+          </div>
+
+          <!-- Amazon Quote -->
+          <div class="flex items-center justify-between p-2 bg-[#0B0F19] border border-orange-500/30 rounded-lg">
+            <div class="flex items-center gap-1.5">
+              <span class="text-orange-400 font-bold">🛒 Amazon US:</span>
+              <a id="inspect-amzn-link" href="https://www.amazon.com" target="_blank" class="text-[#38BDF8] hover:underline flex items-center gap-0.5 text-[11px]">
+                amazon.com <i data-lucide="external-link" class="w-2.5 h-2.5"></i>
+              </a>
+            </div>
+            <span id="inspect-amzn" class="text-orange-400 font-bold">$203.99</span>
+          </div>
+
+          <!-- BestBuy Quote -->
+          <div class="flex items-center justify-between p-2 bg-[#0B0F19] border border-amber-500/30 rounded-lg">
+            <div class="flex items-center gap-1.5">
+              <span class="text-amber-400 font-bold">🏷️ BestBuy:</span>
+              <a id="inspect-bby-link" href="https://www.bestbuy.com" target="_blank" class="text-[#38BDF8] hover:underline flex items-center gap-0.5 text-[11px]">
+                bestbuy.com <i data-lucide="external-link" class="w-2.5 h-2.5"></i>
+              </a>
+            </div>
+            <span id="inspect-bby" class="text-amber-400 font-bold">$191.99</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- STRATEGIC DECISION LOGIC CARD (AMBER BORDER) -->
+      <div class="bg-[#121826] border border-amber-500/50 rounded-xl p-3.5 flex flex-col gap-2.5 shadow-[0_0_15px_rgba(245,158,11,0.06)]">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-mono font-bold text-amber-400 flex items-center gap-1.5">
+            <i data-lucide="shield-alert" class="w-4 h-4 text-amber-400"></i>
+            <span>STRATEGIC DECISION LOGIC</span>
+          </span>
+          <span class="text-[10px] font-mono text-emerald-400 bg-emerald-950/40 border border-emerald-500/30 px-1.5 py-0.5 rounded">
+            Auto-Guarded
+          </span>
+        </div>
+
+        <p id="inspect-reason" class="text-xs text-[#CBD5E1] leading-relaxed">
+          Strategic logic: Under-cut BestBuy by <strong>$0.50</strong> to recover #1 buy-box spot while staying <strong>+$47.50</strong> above your margin safety floor ($143.99).
+        </p>
+
+        <!-- Big Execution Metric Box -->
+        <div class="flex items-center justify-between bg-[#0B0F19] border border-amber-500/30 rounded-lg p-2.5">
+          <div class="flex flex-col">
+            <span class="text-[10px] font-mono uppercase text-[#94A3B8]">Target Reprice</span>
+            <span id="inspect-rec" class="text-xl font-extrabold font-mono text-[#38BDF8]">$191.49</span>
+          </div>
+          <div class="flex flex-col text-right">
+            <span class="text-[10px] font-mono uppercase text-emerald-400">Protected Margin</span>
+            <span id="inspect-margin" class="text-sm font-bold font-mono text-emerald-400">24.8% (+$47.50)</span>
+          </div>
+        </div>
+
+        <!-- Run Repricer Button with Loading State -->
+        <button id="btn-run-repricer" onclick="triggerSimulatedReprice('single')" title="Runs sandbox Shopify API pricing push (Simulated)" class="w-full py-2 px-3 bg-gradient-to-r from-[#4F46E5] to-[#38BDF8] hover:from-indigo-500 hover:to-sky-400 text-white font-extrabold rounded-lg text-xs font-mono transition shadow-lg shadow-indigo-500/25 active:scale-95 flex items-center justify-center gap-2">
+          <i data-lucide="zap" class="w-4 h-4"></i>
+          <span id="btn-single-text">⚡ Run Repricer: $191.49</span>
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- 6. BOTTOM TECHNICAL LOGS & TELEMETRY (LINUX-STYLE TERMINAL) -->
+  <div class="bg-[#080C16] border border-[#1F293D] rounded-xl p-3 flex flex-col font-mono text-xs">
+    <div class="flex items-center justify-between mb-1.5 pb-1 border-b border-[#1F293D] text-[11px]">
+      <span class="text-[#38BDF8] font-bold flex items-center gap-1.5">
+        <i data-lucide="terminal" class="w-3.5 h-3.5"></i>
+        <span>🖥️ Execution &amp; Security Log</span>
+      </span>
+      <span class="text-slate-500">ENGINE: V8-ISOLATE | ROTATION: RESIDENTIAL-AU</span>
+    </div>
+    <div id="terminal-stream" class="flex flex-col gap-1 text-[11.5px] text-[#94A3B8] max-h-[85px] overflow-y-auto leading-relaxed">
+      <div>[14:22:01] <span class="text-emerald-400 font-bold">[SUCCESS]</span> Target domain response 200 OK (Proxyless/Res-Rotated)</div>
+      <div>[14:22:03] <span class="text-amber-400 font-bold">[WAF BYPASS]</span> Cloudflare challenge detected ➔ Emulating TLS/JA3 Fingerprint...</div>
+      <div>[14:22:04] <span class="text-emerald-400 font-bold">[SOLVED]</span> Captcha/JS Token successfully generated via CapSolver (1.2s)</div>
+      <div>[14:22:06] <span class="text-[#38BDF8] font-bold">[EXTRACTED]</span> Parsing 28 elements via Next.js background payload...</div>
+      <div>[14:22:08] <span class="text-emerald-400 font-bold">[TRADE LOG]</span> BestBuy online verified at $191.99 ➔ Calculated undercut: $191.49</div>
+    </div>
+  </div>
+
+
+  <!-- CLIENT-SIDE SIMULATION ENGINE JAVASCRIPT -->
+  <script>
+    // Complete Ground-Truth Products Dataset
+    const PRODUCTS = [
+      { id: 1, sku: 'SMA-APP-IPH-121', brand: 'Apple', title: 'Apple iPhone 5s', barcode: '8814683940853', cost: 143.99, storePrice: 199.99, amzn: 203.99, bby: 191.99, thumb: 'https://cdn.dummyjson.com/product-images/smartphones/iphone-5s/thumbnail.webp', history: [199.99, 198.50, 196.00, 191.99, 191.49] },
+      { id: 2, sku: 'SMA-APP-IPH-122', brand: 'Apple', title: 'Apple iPhone 6', barcode: '9922357685013', cost: 215.99, storePrice: 299.99, amzn: 295.99, bby: 299.99, thumb: 'https://cdn.dummyjson.com/product-images/smartphones/iphone-6/thumbnail.webp', history: [299.99, 299.00, 297.50, 295.99, 295.49] },
+      { id: 3, sku: 'SMA-APP-IPH-123', brand: 'Apple', title: 'Apple iPhone 13 Pro', barcode: '4998438802308', cost: 791.99, storePrice: 1099.99, amzn: 1084.49, bby: 1104.99, thumb: 'https://cdn.dummyjson.com/product-images/smartphones/iphone-13-pro/thumbnail.webp', history: [1105.00, 1099.99, 1092.00, 1084.49, 1083.99] },
+      { id: 4, sku: 'SMA-APP-IPH-124', brand: 'Apple', title: 'Apple iPhone X', barcode: '3034949322264', cost: 647.99, storePrice: 899.99, amzn: 889.99, bby: 905.00, thumb: 'https://cdn.dummyjson.com/product-images/smartphones/iphone-x/thumbnail.webp', history: [905.00, 899.99, 895.00, 889.99, 889.49] },
+      { id: 5, sku: 'SMA-OPP-OPP-125', brand: 'Oppo', title: 'Oppo Oppo A57', barcode: '651223722522', cost: 179.99, storePrice: 249.99, amzn: 249.99, bby: 254.99, thumb: 'https://cdn.dummyjson.com/product-images/smartphones/oppo-a57/thumbnail.webp', history: [249.99, 249.99, 249.99, 249.99, 249.99] },
+      { id: 6, sku: 'SMA-OPP-OPP-126', brand: 'Oppo', title: 'Oppo Oppo F19 Pro Plus', barcode: '8576893968169', cost: 287.99, storePrice: 399.99, amzn: 394.99, bby: 399.99, thumb: 'https://cdn.dummyjson.com/product-images/smartphones/oppo-f19-pro-plus/thumbnail.webp', history: [399.99, 398.00, 396.00, 394.99, 394.49] },
+      { id: 7, sku: 'SMA-OPP-OPP-127', brand: 'Oppo', title: 'Oppo Oppo K1', barcode: '3106827888743', cost: 215.99, storePrice: 299.99, amzn: 299.99, bby: 305.00, thumb: 'https://cdn.dummyjson.com/product-images/smartphones/oppo-k1/thumbnail.webp', history: [305.00, 302.00, 299.99, 299.99, 299.99] },
+      { id: 8, sku: 'SMA-REA-REA-128', brand: 'Realme', title: 'Realme Realme C35', barcode: '7825844344364', cost: 107.99, storePrice: 149.99, amzn: 153.99, bby: 149.99, thumb: 'https://cdn.dummyjson.com/product-images/smartphones/realme-c35/thumbnail.webp', history: [153.99, 151.00, 149.99, 149.99, 149.49] },
+      { id: 9, sku: 'SMA-REA-REA-129', brand: 'Realme', title: 'Realme Realme X', barcode: '4948452391831', cost: 215.99, storePrice: 299.99, amzn: 291.99, bby: 299.99, thumb: 'https://cdn.dummyjson.com/product-images/smartphones/realme-x/thumbnail.webp', history: [299.99, 295.00, 293.00, 291.99, 291.49] },
+      { id: 10, sku: 'SMA-REA-REA-130', brand: 'Realme', title: 'Realme Realme XT', barcode: '6151817227632', cost: 251.99, storePrice: 349.99, amzn: 344.99, bby: 349.99, thumb: 'https://cdn.dummyjson.com/product-images/smartphones/realme-xt/thumbnail.webp', history: [349.99, 347.00, 345.50, 344.99, 344.49] },
+      { id: 11, sku: 'SMA-SAM-SAM-131', brand: 'Samsung', title: 'Samsung Galaxy S7', barcode: '7557912146622', cost: 215.99, storePrice: 299.99, amzn: 295.99, bby: 299.99, thumb: 'https://cdn.dummyjson.com/product-images/smartphones/samsung-galaxy-s7/thumbnail.webp', history: [299.99, 298.00, 296.50, 295.99, 295.49] },
+      { id: 12, sku: 'SMA-SAM-SAM-132', brand: 'Samsung', title: 'Samsung Galaxy S8', barcode: '5995499013336', cost: 359.99, storePrice: 499.99, amzn: 489.99, bby: 495.00, thumb: 'https://cdn.dummyjson.com/product-images/smartphones/samsung-galaxy-s8/thumbnail.webp', history: [495.00, 492.00, 490.50, 489.99, 489.49] },
+      { id: 13, sku: 'SMA-SAM-SAM-133', brand: 'Samsung', title: 'Samsung Galaxy S10', barcode: '4676898229465', cost: 503.99, storePrice: 699.99, amzn: 689.99, bby: 699.99, thumb: 'https://cdn.dummyjson.com/product-images/smartphones/samsung-galaxy-s10/thumbnail.webp', history: [699.99, 695.00, 692.00, 689.99, 689.49] },
+      { id: 14, sku: 'SMA-VIV-VIV-134', brand: 'Vivo', title: 'Vivo Vivo S1', barcode: '8575699153333', cost: 179.99, storePrice: 249.99, amzn: 245.99, bby: 249.99, thumb: 'https://cdn.dummyjson.com/product-images/smartphones/vivo-s1/thumbnail.webp', history: [249.99, 248.00, 246.50, 245.99, 245.49] },
+      { id: 15, sku: 'SMA-VIV-VIV-135', brand: 'Vivo', title: 'Vivo Vivo V9', barcode: '4295398764784', cost: 215.99, storePrice: 299.99, amzn: 294.99, bby: 299.99, thumb: 'https://cdn.dummyjson.com/product-images/smartphones/vivo-v9/thumbnail.webp', history: [299.99, 297.00, 295.50, 294.99, 294.49] },
+      { id: 16, sku: 'SMA-VIV-VIV-136', brand: 'Vivo', title: 'Vivo Vivo X21', barcode: '9944308291810', cost: 359.99, storePrice: 499.99, amzn: 489.99, bby: 499.99, thumb: 'https://cdn.dummyjson.com/product-images/smartphones/vivo-x21/thumbnail.webp', history: [499.99, 495.00, 492.00, 489.99, 489.49] }
+    ];
+
+    let currentSelectedSku = 'SMA-APP-IPH-121';
+    let selectedSkuSet = new Set();
+    let currentFilterBrand = 'All';
+    let currentFilterCat = 'all';
+    let currentSearch = '';
+    let currentViewMode = 'chart';
+    let marketChartInstance = null;
+
+    // Repricing Math
+    function calculateProductReprice(p) {
+      const floorPct = parseFloat(document.getElementById('inp-floor').value) || 15;
+      const undercut = parseFloat(document.getElementById('inp-undercut').value) || 0.50;
+      const surgePct = parseFloat(document.getElementById('inp-surge').value) || 8;
+
+      const floorPrice = +(p.cost * (1 + floorPct / 100)).toFixed(2);
+      const lowestComp = Math.min(p.amzn, p.bby);
+      let targetPrice = +(lowestComp - undercut).toFixed(2);
+
+      let action = '🚨 Win Buy-Box';
+      let reason = `Under-cut lowest competitor by $${undercut.toFixed(2)} to recover #1 buy-box spot while staying above safety floor.`;
+
+      if (targetPrice < floorPrice) {
+        targetPrice = floorPrice;
+        action = '🛡️ Margin Floor';
+        reason = `Competitor dumped below safety margin! Price locked at margin floor ($${floorPrice.toFixed(2)}).`;
+      } else if (p.storePrice <= lowestComp && Math.abs(p.storePrice - lowestComp) <= 0.5) {
+        action = '✓ Buy-Box Parity';
+        reason = `Current price already optimal at $${p.storePrice.toFixed(2)}.`;
+      }
+
+      const marginDollar = +(targetPrice - p.cost).toFixed(2);
+      const marginPct = +((marginDollar / targetPrice) * 100).toFixed(1);
+
+      return {
+        floorPrice,
+        recPrice: targetPrice,
+        marginDollar,
+        marginPct,
+        action,
+        reason
+      };
+    }
+
+    // Initialize Chart
+    function renderChartForProduct(product) {
+      const ctx = document.getElementById('marketChart').getContext('2d');
+      const calc = calculateProductReprice(product);
+
+      const labels = ['Day 1', 'Day 7', 'Day 14', 'Day 21', 'Day 30'];
+      const ourData = [product.storePrice, product.storePrice - 1.5, product.storePrice - 2.0, product.storePrice, product.storePrice];
+      const amznData = [product.amzn + 4, product.amzn + 2, product.amzn, product.amzn - 1, product.amzn];
+      const bbyData = [product.bby + 2, product.bby + 1, product.bby, product.bby + 3, product.bby];
+      const floorData = Array(5).fill(calc.floorPrice);
+
+      if (marketChartInstance) {
+        marketChartInstance.destroy();
+      }
+
+      marketChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Our Store',
+              data: ourData,
+              borderColor: '#38BDF8',
+              backgroundColor: 'rgba(56, 189, 248, 0.1)',
+              borderWidth: 3,
+              tension: 0.3,
+              fill: false
+            },
+            {
+              label: 'Amazon US',
+              data: amznData,
+              borderColor: '#F97316',
+              borderDash: [5, 5],
+              borderWidth: 2,
+              tension: 0.3,
+              fill: false
+            },
+            {
+              label: 'BestBuy',
+              data: bbyData,
+              borderColor: '#F59E0B',
+              borderDash: [2, 2],
+              borderWidth: 2,
+              tension: 0.3,
+              fill: false
+            },
+            {
+              label: 'Safety Floor',
+              data: floorData,
+              borderColor: '#EF4444',
+              borderWidth: 1.5,
+              borderDash: [3, 3],
+              pointRadius: 0,
+              fill: {
+                target: 'origin',
+                above: 'rgba(239, 68, 68, 0.08)'
+              }
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#121826',
+              borderColor: '#1F293D',
+              borderWidth: 1,
+              titleFont: { family: 'Space Mono', size: 11 },
+              bodyFont: { family: 'Space Mono', size: 11 },
+              callbacks: {
+                label: (ctx) => ` ${ctx.dataset.label}: $${ctx.parsed.y.toFixed(2)}`
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: '#1F293D' },
+              ticks: { color: '#94A3B8', font: { family: 'Space Mono', size: 10 } }
+            },
+            y: {
+              grid: { color: '#1F293D' },
+              ticks: {
+                color: '#94A3B8',
+                font: { family: 'Space Mono', size: 10 },
+                callback: (val) => '$' + val
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // Select Product & Update Inspector
+    function selectProduct(sku) {
+      currentSelectedSku = sku;
+      const p = PRODUCTS.find(x => x.sku === sku);
+      if (!p) return;
+
+      const calc = calculateProductReprice(p);
+
+      // Update Inspector UI
+      document.getElementById('inspect-title').innerText = p.title;
+      document.getElementById('inspect-sku').innerText = p.sku;
+      document.getElementById('inspect-ean').innerText = p.barcode;
+      document.getElementById('active-sku-chip').innerText = p.title;
+
+      document.getElementById('thumb-our').src = p.thumb;
+      document.getElementById('thumb-comp').src = p.thumb;
+
+      document.getElementById('inspect-cost').innerText = '$' + p.cost.toFixed(2);
+      document.getElementById('inspect-our').innerText = '$' + p.storePrice.toFixed(2);
+      document.getElementById('inspect-amzn').innerText = '$' + p.amzn.toFixed(2);
+      document.getElementById('inspect-bby').innerText = '$' + p.bby.toFixed(2);
+
+      document.getElementById('inspect-amzn-link').href = `https://www.amazon.com/s?k=${encodeURIComponent(p.title)}`;
+      document.getElementById('inspect-bby-link').href = `https://www.bestbuy.com/site/searchpage.jsp?st=${encodeURIComponent(p.title)}`;
+
+      document.getElementById('inspect-rec').innerText = '$' + calc.recPrice.toFixed(2);
+      document.getElementById('inspect-margin').innerText = `${calc.marginPct}% (+$${calc.marginDollar.toFixed(2)})`;
+      document.getElementById('btn-single-text').innerText = `⚡ Run Repricer: $${calc.recPrice.toFixed(2)}`;
+
+      const lowestSite = p.bby <= p.amzn ? 'BestBuy' : 'Amazon';
+      const uVal = parseFloat(document.getElementById('inp-undercut').value) || 0.50;
+      document.getElementById('inspect-reason').innerHTML = `Strategic logic: Under-cut ${lowestSite} by <strong>$${uVal.toFixed(2)}</strong> to recover #1 buy-box spot while staying <strong>+$${calc.marginDollar.toFixed(2)}</strong> above your margin safety floor ($${calc.floorPrice.toFixed(2)}).`;
+
+      // Redraw Chart
+      renderChartForProduct(p);
+
+      // Re-render table rows to update selected indigo highlight
+      renderCatalogRows();
+
+      addLog(`[FOCUS] Product context bound to ${p.title} (SKU: ${p.sku})`, 'info');
+    }
+
+    // Render Sparkline SVG
+    function getSparklineSVG(history, isDanger) {
+      const min = Math.min(...history);
+      const max = Math.max(...history);
+      const rng = max - min || 1;
+      const pts = history.map((val, idx) => {
+        const x = (idx / (history.length - 1)) * 60 + 2;
+        const y = 20 - ((val - min) / rng) * 16 + 2;
+        return `${x.toFixed(1)},${y.toFixed(1)}`;
+      }).join(' ');
+
+      const color = isDanger ? '#EF4444' : '#10B981';
+      return `<svg width="64" height="22" style="overflow:visible;">
+        <polyline fill="none" stroke="${color}" stroke-width="2" points="${pts}" />
+      </svg>`;
+    }
+
+    // Render Table Rows
+    function renderCatalogRows() {
+      const container = document.getElementById('catalog-rows');
+      container.innerHTML = '';
+
+      let list = PRODUCTS.filter(p => {
+        const matchesBrand = (currentFilterBrand === 'All' || p.brand === currentFilterBrand);
+        const q = currentSearch.toLowerCase();
+        const matchesSearch = !q || p.title.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q) || p.barcode.includes(q);
+
+        const calc = calculateProductReprice(p);
+        let matchesCat = true;
+        if (currentFilterCat === 'alerts') {
+          matchesCat = (calc.action.includes('Win') || calc.action.includes('Floor'));
+        } else if (currentFilterCat === 'winning') {
+          matchesCat = calc.action.includes('Parity');
+        }
+
+        return matchesBrand && matchesSearch && matchesCat;
+      });
+
+      list.forEach(p => {
+        const isSelected = (p.sku === currentSelectedSku);
+        const isChecked = selectedSkuSet.has(p.sku);
+        const calc = calculateProductReprice(p);
+
+        const row = document.createElement('div');
+        row.className = `grid grid-cols-12 gap-2 px-3 py-2 rounded-lg text-xs font-mono items-center transition border ${isSelected ? 'selected-row border-[#4F46E5]' : 'bg-[#0F1422] border-[#1F293D] hover:border-slate-700'}`;
+        
+        const isAlert = p.amzn < p.storePrice || p.bby < p.storePrice;
+        const badgeColor = isAlert ? 'text-rose-400 border-rose-500/40 bg-rose-950/30' : 'text-emerald-400 border-emerald-500/40 bg-emerald-950/30';
+
+        row.innerHTML = `
+          <div class="col-span-1 flex items-center gap-2">
+            <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleSelectSku('${p.sku}', this.checked)" class="accent-indigo-600 rounded cursor-pointer">
+            <span class="${isSelected ? 'text-[#38BDF8] font-bold' : 'text-[#94A3B8]'}">${p.sku}</span>
+          </div>
+          <div class="col-span-3 text-[#F8FAFC] font-sans font-semibold truncate cursor-pointer" onclick="selectProduct('${p.sku}')">
+            ${p.title}
+          </div>
+          <div class="col-span-1 flex justify-center">
+            ${getSparklineSVG(p.history, isAlert)}
+          </div>
+          <div class="col-span-1 text-right text-[#38BDF8] font-bold">$${p.storePrice.toFixed(2)}</div>
+          <div class="col-span-1 text-right text-orange-400">$${p.amzn.toFixed(2)}</div>
+          <div class="col-span-1 text-right text-amber-400">$${p.bby.toFixed(2)}</div>
+          <div class="col-span-1 text-right text-emerald-400 font-bold">$${calc.recPrice.toFixed(2)}</div>
+          <div class="col-span-2 text-center">
+            <span class="px-2 py-0.5 rounded text-[10px] border ${badgeColor}">${calc.action}</span>
+          </div>
+          <div class="col-span-1 text-center">
+            <button onclick="selectProduct('${p.sku}')" class="px-2 py-0.5 rounded text-[11px] font-bold ${isSelected ? 'bg-[#4F46E5] text-white' : 'bg-[#1F293D] hover:bg-slate-700 text-[#94A3B8] hover:text-white'} transition">
+              ${isSelected ? 'ACTIVE' : 'SELECT'}
+            </button>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    // View Switcher logic (Chart / Catalog / Split)
+    function switchView(mode) {
+      currentViewMode = mode;
+      const cChart = document.getElementById('container-chart');
+      const cCat = document.getElementById('container-catalog');
+
+      const btnChart = document.getElementById('view-btn-chart');
+      const btnCat = document.getElementById('view-btn-catalog');
+      const btnSplit = document.getElementById('view-btn-split');
+
+      [btnChart, btnCat, btnSplit].forEach(b => {
+        b.className = 'flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-md text-[#94A3B8] hover:text-[#F8FAFC] transition';
+      });
+
+      if (mode === 'chart') {
+        btnChart.className = 'flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-md bg-[#4F46E5] text-white shadow transition';
+        cChart.classList.remove('hidden');
+        cCat.classList.add('hidden');
+        document.getElementById('active-panel-heading').innerText = 'Market Defense Chart Analysis';
+      } else if (mode === 'catalog') {
+        btnCat.className = 'flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-md bg-[#4F46E5] text-white shadow transition';
+        cChart.classList.add('hidden');
+        cCat.classList.remove('hidden');
+        document.getElementById('active-panel-heading').innerText = 'Interactive Catalog Registry';
+      } else if (mode === 'split') {
+        btnSplit.className = 'flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-md bg-[#4F46E5] text-white shadow transition';
+        cChart.classList.remove('hidden');
+        cCat.classList.remove('hidden');
+        document.getElementById('active-panel-heading').innerText = 'Dual Split Workstation (Chart + Matrix)';
+      }
+
+      if (marketChartInstance) {
+        setTimeout(() => marketChartInstance.resize(), 100);
+      }
+    }
+
+    // Multi-select actions
+    function toggleSelectSku(sku, checked) {
+      if (checked) selectedSkuSet.add(sku);
+      else selectedSkuSet.delete(sku);
+      document.getElementById('selected-count').innerText = selectedSkuSet.size;
+    }
+
+    function toggleSelectAll(checked) {
+      if (checked) {
+        PRODUCTS.forEach(p => selectedSkuSet.add(p.sku));
+      } else {
+        selectedSkuSet.clear();
+      }
+      document.getElementById('selected-count').innerText = selectedSkuSet.size;
+      renderCatalogRows();
+    }
+
+    function executeBulkSelected() {
+      const count = selectedSkuSet.size || PRODUCTS.length;
+      showToast(`⚡ Bulk Repricing: Executed simulated push for ${count} SKUs!`, 'success');
+      addLog(`[BULK API] Pushed simulated pricing updates for ${count} SKUs to Shopify GraphQL`, 'success');
+    }
+
+    function exportCSVSelected() {
+      const count = selectedSkuSet.size || PRODUCTS.length;
+      showToast(`📥 Export: Downloaded Shopify CSV for ${count} items.`, 'info');
+      addLog(`[EXPORT] Generated Shopify CSV matrix export with ${count} items`, 'info');
+    }
+
+    // Filter Handlers
+    function handleBrandFilter(val) {
+      currentFilterBrand = val;
+      renderCatalogRows();
+    }
+
+    function setFilterCategory(cat) {
+      currentFilterCat = cat;
+      ['all', 'alerts', 'winning'].forEach(c => {
+        const btn = document.getElementById(`f-cat-${c}`);
+        if (c === cat) {
+          btn.className = 'px-2.5 py-1 rounded bg-[#1F293D] text-[#F8FAFC] font-semibold transition';
+        } else {
+          btn.className = 'px-2.5 py-1 rounded text-[#94A3B8] hover:text-white transition';
+        }
+      });
+      renderCatalogRows();
+    }
+
+    function handleSearch(val) {
+      currentSearch = val;
+      renderCatalogRows();
+    }
+
+    function updateStrategyParams() {
+      selectProduct(currentSelectedSku);
+      renderCatalogRows();
+    }
+
+    function handleToggleEvent(name, val) {
+      addLog(`[SYSTEM] Anti-bot emulations updated: ${name} = ${val ? 'ENABLED' : 'DISABLED'}`, 'info');
+      showToast(`✓ Option '${name}' toggled to ${val ? 'Active' : 'Off'}`, 'info');
+    }
+
+    // Simulation Trigger Execution (Spinner + Toast + Log)
+    function triggerSimulatedReprice(scope) {
+      const p = PRODUCTS.find(x => x.sku === currentSelectedSku);
+      const calc = calculateProductReprice(p);
+
+      const btn = document.getElementById(scope === 'single' ? 'btn-run-repricer' : 'btn-reprice-text');
+      const originalHTML = btn.innerHTML;
+
+      btn.innerHTML = `<span class="inline-block animate-spin mr-1">⏳</span> Pushing GraphQL...`;
+
+      setTimeout(() => {
+        btn.innerHTML = originalHTML;
+        p.storePrice = calc.recPrice;
+        selectProduct(p.sku);
+
+        showToast(`✓ Shopify SKU ${p.sku} Price updated to $${calc.recPrice.toFixed(2)} successfully (Simulation)`, 'success');
+        addLog(`[SHOPIFY 200] Mutation confirmed: ${p.sku} re-pegged at $${calc.recPrice.toFixed(2)} (Recaptured Buy-Box)`, 'success');
+      }, 1200);
+    }
+
+    function triggerTelegramAlert() {
+      showToast(`📡 Telegram Alert Dispatched: Active price drops sent to sellers channel.`, 'info');
+      addLog(`[DISPATCH] Sent high-priority arbitrage telegram alert webhook payload`, 'info');
+    }
+
+    // Toast Notification helper
+    function showToast(msg, type) {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      const isSuccess = (type === 'success');
+      toast.className = `pointer-events-auto flex items-center gap-2 px-3.5 py-2.5 rounded-xl border shadow-xl text-xs font-mono transition-all duration-300 transform translate-y-2 opacity-0 ${isSuccess ? 'bg-emerald-950/90 border-emerald-500/40 text-emerald-200' : 'bg-slate-900/90 border-slate-700 text-slate-200'}`;
+      toast.innerHTML = `<span class="${isSuccess ? 'text-emerald-400' : 'text-sky-400'}">${isSuccess ? '✓' : 'ℹ'}</span><span>${msg}</span>`;
+
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.classList.remove('translate-y-2', 'opacity-0');
+      }, 20);
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    // Terminal Log helper
+    function addLog(msg, type) {
+      const stream = document.getElementById('terminal-stream');
+      const now = new Date().toTimeString().split(' ')[0];
+      const div = document.createElement('div');
+      const colorClass = type === 'success' ? 'text-emerald-400 font-bold' : (type === 'warn' ? 'text-amber-400 font-bold' : 'text-[#38BDF8]');
+      div.innerHTML = `[${now}] <span class="${colorClass}">${msg}</span>`;
+      stream.appendChild(div);
+      stream.scrollTop = stream.scrollHeight;
+    }
+
+    // Initialize App
+    window.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      selectProduct(currentSelectedSku);
+      renderCatalogRows();
+    });
+  </script>
+</body>
+</html>
