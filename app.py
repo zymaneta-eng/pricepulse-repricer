@@ -499,8 +499,20 @@ with col_left_65:
     if view_mode in ["[ 📋 Catalog List ]", "[ ⚡ Split ]"]:
         st.markdown("""
         <div style="font-size: 0.8rem; font-weight: 700; color: #F8FAFC; margin-bottom: 0.35rem; display: flex; justify-content: space-between;">
-          <span>📋 INTERACTIVE PRODUCT REGISTRY TABLE (16 SKUs)</span>
-          <span style="font-size: 0.7rem; color: #64748B; font-family: 'Space Mono';">CLICK [SELECT] TO BIND INSPECTOR</span>
+          <span>📋 ИНТЕРАКТИВНЫЙ РЕЕСТР ТОВАРОВ (16 SKUs)</span>
+          <span style="font-size: 0.7rem; color: #64748B; font-family: 'Space Mono';">КЛИКНИТЕ [SELECT] ДЛЯ ПРИВЯЗКИ В ИНСПЕКТОР</span>
+        </div>
+        <div style="background: #060914; border: 1px solid #1E293B; border-radius: 6px; padding: 6px 10px; margin-bottom: 5px;">
+          <div style="display: grid; grid-template-columns: 1.1fr 2fr 1fr 1fr 1fr 1fr 1fr 1.2fr; align-items: center; gap: 8px; font-size: 0.68rem; font-family: 'Space Mono'; color: #64748B; text-transform: uppercase;">
+            <div>SKU</div>
+            <div>Товар (Title)</div>
+            <div>Тренд 7D</div>
+            <div style="color: #06B6D4;">🏪 Shopify</div>
+            <div style="color: #F97316;">🛒 Amazon.com</div>
+            <div style="color: #F59E0B;">🏷️ BestBuy.com</div>
+            <div style="color: #10B981;">🎯 Цель Algo</div>
+            <div>Статус Buy-Box</div>
+          </div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -610,11 +622,42 @@ with col_right_35:
       <div style="font-size: 0.68rem; font-family: 'Space Mono'; color: #F59E0B; text-transform: uppercase; margin-bottom: 6px;">COMPETITOR PRICE GRID</div>
     """, unsafe_allow_html=True)
 
+    amzn_query = active_title.replace(' ', '+')
+    bby_query = active_title.replace(' ', '+')
+    amzn_link = f"https://www.amazon.com/s?k={amzn_query}"
+    bby_link = f"https://www.bestbuy.com/site/searchpage.jsp?st={bby_query}"
+    asin_val = active_row.get("comp_a_asin", "B08146839X")
+
     st.markdown(f"""
-      <div class="quote-box" style="background: #060914; border: 1px solid #1E293B;"><span style="color: #94A3B8;">Cost Price (COGS):</span> <span style="color: #64748B;">${active_cost:.2f}</span></div>
-      <div class="quote-box" style="background: #060914; border: 1px solid #1E293B;"><span style="color: #94A3B8;">Your Current Price:</span> <span style="color: #06B6D4; font-weight: 700;">${active_our_price:.2f}</span></div>
-      <div class="quote-box" style="background: #060914; border: 1px solid #1E293B;"><span style="color: #F97316;">Amazon US:</span> <span style="color: #F97316; font-weight: 700;">${active_comp_a:.2f}</span></div>
-      <div class="quote-box" style="background: #060914; border: 1px solid #1E293B;"><span style="color: #F59E0B;">BestBuy:</span> <span style="color: #F59E0B; font-weight: 700;">${active_comp_b:.2f}</span></div>
+      <div class="quote-box" style="background: #060914; border: 1px solid #1E293B;">
+        <span style="color: #94A3B8;">Базовая себестоимость (COGS):</span>
+        <span style="color: #64748B;">${active_cost:.2f}</span>
+      </div>
+      <div class="quote-box" style="background: #060914; border: 1px solid rgba(6, 182, 212, 0.4);">
+        <div>
+          <span style="color: #06B6D4; font-weight: 700;">🏪 Наш магазин:</span> 
+          <span style="font-size: 0.68rem; color: #94A3B8;">myshopify.com</span>
+        </div>
+        <span style="color: #06B6D4; font-weight: 700;">${active_our_price:.2f}</span>
+      </div>
+      <div class="quote-box" style="background: #060914; border: 1px solid rgba(249, 115, 22, 0.4);">
+        <div>
+          <span style="color: #F97316; font-weight: 700;">🛒 Amazon.com:</span> 
+          <a href="{amzn_link}" target="_blank" style="font-size: 0.68rem; color: #FB923C; text-decoration: underline; margin-left: 4px;">
+            ASIN: {asin_val} ↗
+          </a>
+        </div>
+        <span style="color: #F97316; font-weight: 700;">${active_comp_a:.2f}</span>
+      </div>
+      <div class="quote-box" style="background: #060914; border: 1px solid rgba(245, 158, 11, 0.4);">
+        <div>
+          <span style="color: #F59E0B; font-weight: 700;">🏷️ BestBuy.com:</span> 
+          <a href="{bby_link}" target="_blank" style="font-size: 0.68rem; color: #FBBF24; text-decoration: underline; margin-left: 4px;">
+            bestbuy.com ↗
+          </a>
+        </div>
+        <span style="color: #F59E0B; font-weight: 700;">${active_comp_b:.2f}</span>
+      </div>
     </div>
     """, unsafe_allow_html=True)
 
