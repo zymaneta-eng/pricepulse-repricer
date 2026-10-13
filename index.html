@@ -274,7 +274,7 @@
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 mb-2.5">
     
     <!-- LEFT PANEL: 65% (8/12 cols) - MARKET DEFENSE & REGISTRY -->
-    <div class="lg:col-span-8 flex flex-col gap-2.5">
+    <div class="lg:col-span-8 flex flex-col gap-2.5 min-w-0">
       
       <!-- View Switcher & Toolbar Header -->
       <div class="flex items-center justify-between bg-[#121826] border border-[#1F293D] rounded-xl px-3.5 py-2">
@@ -365,31 +365,31 @@
           <input type="text" id="catalog-search" oninput="handleSearch(this.value)" placeholder="🔍 Search SKU, Title, or Barcode..." class="w-full bg-[#0B0F19] border border-[#1F293D] rounded-lg pl-9 pr-3 py-1.5 text-xs text-[#F8FAFC] placeholder-slate-500 focus:outline-none focus:border-[#4F46E5]">
         </div>
 
-        <!-- Table Header (Dedicated 40px Checkbox Column & Uniform Muted Slate Headers) -->
-        <div class="overflow-x-auto">
-          <div class="min-w-[820px] flex items-center gap-3 px-4 py-2.5 bg-[#0B0F19] border border-[#1F293D] rounded-lg text-xs font-mono text-slate-400 uppercase tracking-wider mb-2">
-            <div class="w-10 shrink-0 flex items-center justify-center">
+        <!-- Table Header (Dedicated Checkbox Column & Perfectly Aligned Headers) -->
+        <div class="overflow-x-auto w-full">
+          <div class="min-w-[760px] flex items-center gap-2.5 px-3 py-2 bg-[#0B0F19] border border-[#1F293D] rounded-lg text-xs font-mono text-slate-400 uppercase tracking-wider mb-2 pr-5">
+            <div class="w-9 shrink-0 flex items-center justify-center">
               <input type="checkbox" id="check-all" onchange="toggleSelectAll(this.checked)" class="accent-indigo-600 rounded cursor-pointer w-3.5 h-3.5">
             </div>
-            <div class="w-36 shrink-0 text-slate-400">SKU</div>
-            <div class="flex-1 min-w-[150px] text-slate-400">PRODUCT NAME</div>
-            <div class="w-20 shrink-0 text-center text-slate-400">7D TREND</div>
-            <div class="w-20 shrink-0 text-right text-slate-400">STORE ($)</div>
-            <div class="w-24 shrink-0 text-right text-slate-400">AMAZON ($)</div>
-            <div class="w-24 shrink-0 text-right text-slate-400">BESTBUY ($)</div>
-            <div class="w-24 shrink-0 text-right text-slate-400">REC ($)</div>
-            <div class="w-28 shrink-0 text-center text-slate-400">BUY-BOX STATUS</div>
+            <div class="w-32 shrink-0 text-slate-400">SKU</div>
+            <div class="flex-1 min-w-[120px] text-slate-400">PRODUCT NAME</div>
+            <div class="w-16 shrink-0 text-center text-slate-400">7D TREND</div>
+            <div class="w-18 shrink-0 text-right text-slate-400">STORE ($)</div>
+            <div class="w-18 shrink-0 text-right text-slate-400">AMAZON ($)</div>
+            <div class="w-18 shrink-0 text-right text-slate-400">BESTBUY ($)</div>
+            <div class="w-18 shrink-0 text-right text-slate-400">REC ($)</div>
+            <div class="w-24 shrink-0 text-center text-slate-400">BUY-BOX STATUS</div>
             <div class="w-16 shrink-0 text-center text-slate-400">ACTION</div>
           </div>
           <!-- Table Rows Container -->
-          <div id="catalog-rows" class="min-w-[820px] flex flex-col gap-1.5 max-h-[360px] overflow-y-auto pr-1"></div>
+          <div id="catalog-rows" class="min-w-[760px] flex flex-col gap-1.5 max-h-[360px] overflow-y-auto pr-1"></div>
         </div>
       </div>
 
     </div>
 
     <!-- RIGHT PANEL: 35% (4/12 cols) - AI PRODUCT INSPECTOR -->
-    <div class="lg:col-span-4 flex flex-col gap-2.5">
+    <div class="lg:col-span-4 flex flex-col gap-2.5 min-w-0">
       
       <!-- Inspector Header Card -->
       <div class="bg-[#121826] border border-[#1F293D] rounded-xl p-3.5 flex flex-col gap-1 border-l-4 border-l-[#4F46E5]">
@@ -809,15 +809,15 @@
       const max = Math.max(...history);
       const rng = max - min || 1;
       const pts = history.map((val, idx) => {
-        const x = (idx / (history.length - 1)) * 62 + 4;
-        const y = 20 - ((val - min) / rng) * 16 + 2;
+        const x = (idx / (history.length - 1)) * 48 + 4;
+        const y = 17 - ((val - min) / rng) * 14 + 2;
         return `${x.toFixed(1)},${y.toFixed(1)}`;
       }).join(' ');
 
       const color = isDanger ? '#EF4444' : '#10B981';
       const glow = isDanger ? 'rgba(239, 68, 68, 0.45)' : 'rgba(16, 185, 129, 0.45)';
       const id = isDanger ? 'spark-red' : 'spark-grn';
-      return `<svg width="70" height="24" style="overflow:visible;">
+      return `<svg width="56" height="20" style="overflow:visible;">
         <defs>
           <filter id="${id}" x="-20%" y="-20%" width="140%" height="140%">
             <feDropShadow dx="0" dy="0" stdDeviation="1.5" flood-color="${glow}" />
@@ -854,56 +854,56 @@
         const calc = calculateProductReprice(p);
 
         const row = document.createElement('div');
-        row.className = `flex items-center gap-3 px-4 py-3 rounded-lg text-xs font-mono transition border ${isSelected ? 'selected-row border-[#4F46E5] shadow-[0_0_12px_rgba(79,70,229,0.18)]' : 'bg-[#0F1422] border-[#1F293D] hover:border-slate-700'}`;
+        row.className = `flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-xs font-mono transition border ${isSelected ? 'selected-row border-[#4F46E5] shadow-[0_0_12px_rgba(79,70,229,0.18)]' : 'bg-[#0F1422] border-[#1F293D] hover:border-slate-700'}`;
         
         const isAlert = p.amzn < p.storePrice || p.bby < p.storePrice;
         const badgeColor = isAlert ? 'text-rose-400 border-rose-500/40 bg-rose-950/30' : 'text-emerald-400 border-emerald-500/40 bg-emerald-950/30';
 
         row.innerHTML = `
-          <!-- 1. Dedicated Checkbox Column (width: 40px) -->
-          <div class="w-10 shrink-0 flex items-center justify-center">
+          <!-- 1. Dedicated Checkbox Column (width: 36px) -->
+          <div class="w-9 shrink-0 flex items-center justify-center">
             <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleSelectSku('${p.sku}', this.checked)" class="accent-indigo-600 rounded cursor-pointer w-3.5 h-3.5">
           </div>
 
           <!-- 2. No-Wrap SKU Badge -->
-          <div class="w-36 shrink-0">
-            <span class="inline-block px-2.5 py-1 rounded bg-[#121826] border border-[#1F293D] font-mono text-[11px] whitespace-nowrap ${isSelected ? 'text-[#38BDF8] border-sky-500/40 font-bold' : 'text-slate-300'}">
+          <div class="w-32 shrink-0">
+            <span class="inline-block px-2 py-0.5 rounded bg-[#121826] border border-[#1F293D] font-mono text-[11px] whitespace-nowrap ${isSelected ? 'text-[#38BDF8] border-sky-500/40 font-bold' : 'text-slate-300'}">
               ${p.sku}
             </span>
           </div>
 
           <!-- 3. Product Name -->
-          <div class="flex-1 min-w-[150px] text-[#F8FAFC] font-sans font-semibold truncate cursor-pointer hover:text-[#38BDF8] transition" onclick="selectProduct('${p.sku}')">
+          <div class="flex-1 min-w-[120px] text-[#F8FAFC] font-sans font-semibold truncate cursor-pointer hover:text-[#38BDF8] transition" onclick="selectProduct('${p.sku}')">
             ${p.title}
           </div>
 
           <!-- 4. 7D Trend Sparkline (2.2px stroke with subtle glow) -->
-          <div class="w-20 shrink-0 flex justify-center">
+          <div class="w-16 shrink-0 flex justify-center">
             ${getSparklineSVG(p.history, isAlert)}
           </div>
 
           <!-- 5. Store ($) Crisp White -->
-          <div class="w-20 shrink-0 text-right text-[#F8FAFC] font-bold">
+          <div class="w-18 shrink-0 text-right text-[#F8FAFC] font-bold">
             $${p.storePrice.toFixed(2)}
           </div>
 
           <!-- 6. Amazon ($) Crisp White -->
-          <div class="w-24 shrink-0 text-right text-[#F8FAFC]">
+          <div class="w-18 shrink-0 text-right text-[#F8FAFC]">
             $${p.amzn.toFixed(2)}
           </div>
 
           <!-- 7. BestBuy ($) Crisp White -->
-          <div class="w-24 shrink-0 text-right text-[#F8FAFC]">
+          <div class="w-18 shrink-0 text-right text-[#F8FAFC]">
             $${p.bby.toFixed(2)}
           </div>
 
           <!-- 8. Rec ($) Highlighted Vibrant Emerald -->
-          <div class="w-24 shrink-0 text-right text-emerald-400 font-extrabold text-[13px]">
+          <div class="w-18 shrink-0 text-right text-emerald-400 font-extrabold text-[13px]">
             $${calc.recPrice.toFixed(2)}
           </div>
 
           <!-- 9. Buy-Box Status Badge -->
-          <div class="w-28 shrink-0 text-center">
+          <div class="w-24 shrink-0 text-center">
             <span class="inline-block px-2 py-0.5 rounded text-[10px] font-mono border whitespace-nowrap ${badgeColor}">
               ${calc.action}
             </span>
