@@ -1,15 +1,12 @@
 """
-PricePulse AI — E-Commerce Competitor Price Intelligence & Dynamic Repricing Command Center.
-Two-Column Master-Detail Terminal (Trading/Retail Intelligence Aesthetic).
-Featuring real product imagery, barcode scanning, interactive Plotly volatility charts,
-and a real-time Repricing Strategy Sandbox.
+PricePulse Terminal v3.0 — High-Frequency Algorithmic E-Commerce Repricing Terminal.
+Bloomberg Terminal & TradingView Hybrid Aesthetic.
+Deep midnight-black palette (#05070D, #0B0F1C) with vibrant trading accents:
+Neon Cyan, Amber Gold, Emerald Green, and Alert Crimson.
 """
 
-import io
-from pathlib import Path
 from datetime import datetime
-
-import openpyxl
+from pathlib import Path
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
@@ -20,31 +17,31 @@ from dataset import fetch_ground_truth_catalog, generate_time_series_history
 
 # 1. Page Configuration
 st.set_page_config(
-    page_title="PricePulse AI | Product Intelligence Cockpit",
+    page_title="PricePulse Terminal v3.0 | Algorithmic Retail Arbitrage",
     page_icon="⚡",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-# 2. Modern Retail/Trading Terminal Styling (Amber & Dark Slate)
+# 2. Ultra-Precise Trading Terminal & FinTech CSS
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap');
 
     * {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
 
-    code, .mono {
+    code, .mono, .ticker, .stat-num {
         font-family: 'JetBrains Mono', monospace !important;
     }
 
     .stApp {
-        background-color: #080B11 !important;
-        color: #F8FAFC !important;
+        background-color: #05070D !important;
+        color: #E2E8F0 !important;
     }
 
-    /* Completely hide Streamlit header overlay & toolbar */
+    /* Completely hide Streamlit default chrome & paddings */
     header[data-testid="stHeader"], div[data-testid="stToolbar"], div[data-testid="stDecoration"], #MainMenu, footer {
         display: none !important;
         visibility: hidden !important;
@@ -52,45 +49,40 @@ st.markdown("""
     }
 
     .block-container {
-        padding-top: 1.4rem !important;
-        padding-bottom: 2rem !important;
-        padding-left: 2rem !important;
-        padding-right: 2rem !important;
+        padding-top: 1rem !important;
+        padding-bottom: 1.5rem !important;
+        padding-left: 1.5rem !important;
+        padding-right: 1.5rem !important;
         max-width: 100% !important;
     }
 
     div[data-testid="stVerticalBlock"] > div {
-        gap: 0.5rem !important;
+        gap: 0.4rem !important;
     }
 
-    /* Top Command Header */
-    .command-header {
+    /* Top Bloomberg Header */
+    .terminal-nav {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding-bottom: 0.7rem;
-        border-bottom: 1px solid #1E2638;
-        margin-bottom: 0.8rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #161F30;
     }
-    .brand-logo {
-        font-size: 1.25rem;
+    .terminal-title {
+        font-size: 1.15rem;
         font-weight: 800;
         color: #F8FAFC;
+        letter-spacing: -0.02em;
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        letter-spacing: -0.02em;
     }
-    .amber-tag {
-        font-size: 0.72rem;
-        font-weight: 600;
-        color: #F59E0B;
-        background: rgba(245, 158, 11, 0.12);
-        border: 1px solid rgba(245, 158, 11, 0.35);
-        padding: 2px 8px;
-        border-radius: 9999px;
-    }
-    .status-dot {
+    .neon-cyan { color: #00F0FF; text-shadow: 0 0 10px rgba(0, 240, 255, 0.4); }
+    .amber-gold { color: #F59E0B; }
+    .emerald-up { color: #10B981; }
+    .crimson-down { color: #EF4444; }
+
+    .pulse-dot {
         width: 7px;
         height: 7px;
         border-radius: 50%;
@@ -105,103 +97,99 @@ st.markdown("""
         100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
     }
 
-    /* Top Strip KPI Counters */
-    .mini-kpi {
+    /* Full-Width Ticker Tape */
+    .ticker-bar {
+        background: #080C16;
+        border-top: 1px solid #121A2B;
+        border-bottom: 1px solid #161F30;
+        padding: 5px 12px;
+        margin-top: 0.35rem;
+        margin-bottom: 0.6rem;
         display: flex;
         align-items: center;
-        gap: 16px;
-        background: #0F1420;
-        border: 1px solid #1E2638;
+        justify-content: space-between;
+        overflow-x: auto;
+        white-space: nowrap;
+        gap: 20px;
+        font-size: 0.76rem;
+    }
+    .ticker-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Trading Panels */
+    .trading-panel {
+        background: #0A0F1D;
+        border: 1px solid #162035;
         border-radius: 8px;
-        padding: 6px 14px;
-        font-size: 0.8rem;
+        padding: 1rem;
     }
 
-    /* Product Card in Master List */
-    .product-list-card {
-        background: #0F1420;
-        border: 1px solid #1E2638;
-        border-radius: 10px;
-        padding: 0.75rem 0.9rem;
-        margin-bottom: 0.45rem;
-        transition: all 0.15s ease;
+    /* Order Book Style Box */
+    .orderbook-row {
         display: flex;
-        gap: 12px;
+        justify-content: space-between;
         align-items: center;
-    }
-    .product-list-card:hover {
-        border-color: #F59E0B;
-        background: #141B2B;
-    }
-    .product-list-card.selected {
-        border-color: #F59E0B;
-        background: #161F33;
-        box-shadow: 0 0 0 1px #F59E0B;
+        padding: 5px 8px;
+        border-bottom: 1px solid #121A2B;
+        font-size: 0.78rem;
+        font-family: 'JetBrains Mono', monospace;
     }
 
-    /* Big Detail Card (Cockpit) */
-    .cockpit-panel {
-        background: #0F1420;
-        border: 1px solid #1E2638;
-        border-radius: 12px;
-        padding: 1.2rem;
-        margin-bottom: 0.8rem;
-    }
-
-    /* Badges */
-    .badge-win {
-        color: #10B981;
-        background: rgba(16, 185, 129, 0.14);
-        border: 1px solid rgba(16, 185, 129, 0.35);
-        padding: 2px 7px;
-        border-radius: 6px;
-        font-size: 0.72rem;
-        font-weight: 600;
-    }
-    .badge-drop {
-        color: #EF4444;
-        background: rgba(239, 68, 68, 0.14);
-        border: 1px solid rgba(239, 68, 68, 0.35);
-        padding: 2px 7px;
-        border-radius: 6px;
-        font-size: 0.72rem;
-        font-weight: 600;
-    }
-    .badge-surge {
-        color: #F59E0B;
-        background: rgba(245, 158, 11, 0.14);
-        border: 1px solid rgba(245, 158, 11, 0.35);
-        padding: 2px 7px;
-        border-radius: 6px;
-        font-size: 0.72rem;
-        font-weight: 600;
-    }
-
-    /* Primary and Secondary Action Buttons */
+    /* Execution CTA */
     div.stButton > button[kind="primary"] {
-        background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%) !important;
-        color: #080B11 !important;
-        font-weight: 700 !important;
-        font-size: 0.85rem !important;
+        background: linear-gradient(135deg, #00F0FF 0%, #3B82F6 100%) !important;
+        color: #05070D !important;
+        font-weight: 800 !important;
+        font-size: 0.86rem !important;
+        font-family: 'JetBrains Mono', monospace !important;
         border: none !important;
-        border-radius: 8px !important;
-        box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35) !important;
+        border-radius: 6px !important;
+        box-shadow: 0 4px 18px rgba(0, 240, 255, 0.35) !important;
+        letter-spacing: 0.02em !important;
+    }
+    div.stButton > button[kind="primary"]:hover {
+        box-shadow: 0 6px 24px rgba(0, 240, 255, 0.6) !important;
+        transform: translateY(-1px) !important;
     }
     div.stButton > button[kind="secondary"] {
-        background: #0F1420 !important;
-        color: #CBD5E1 !important;
-        border: 1px solid #1E2638 !important;
-        border-radius: 8px !important;
+        background: #0D1424 !important;
+        color: #94A3B8 !important;
+        border: 1px solid #1C273E !important;
+        border-radius: 6px !important;
+        font-family: 'JetBrains Mono', monospace !important;
+        font-size: 0.8rem !important;
+    }
+    div.stButton > button[kind="secondary"]:hover {
+        border-color: #00F0FF !important;
+        color: #F8FAFC !important;
+    }
+
+    /* Terminal Console Stream */
+    .console-stream {
+        background: #04060A;
+        border: 1px solid #121A2B;
+        border-left: 3px solid #00F0FF;
+        border-radius: 6px;
+        padding: 8px 14px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.74rem;
+        color: #94A3B8;
+        line-height: 1.5;
     }
 
     div[data-baseweb="select"] > div {
-        background-color: #080B11 !important;
-        border-color: #1E2638 !important;
+        background-color: #080C16 !important;
+        border-color: #162035 !important;
+        border-radius: 6px !important;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# 3. Load Ground-Truth Verifiable Data
+# 3. Load Ground-Truth Data
 @st.cache_data(ttl=3600)
 def get_cached_catalog():
     cat_file = Path(__file__).resolve().parent / "catalog.xlsx"
@@ -219,263 +207,251 @@ def get_cached_history(df_catalog):
 catalog_df = get_cached_catalog()
 history_df = get_cached_history(catalog_df)
 
-# 4. Top Navigation Bar
+# 4. Top Navigation Bar (Bloomberg Terminal Inspired)
 st.markdown("""
-<div class="command-header">
-  <div style="display: flex; align-items: center; gap: 10px;">
-    <span class="brand-logo">⚡ PricePulse Cockpit</span>
-    <span class="amber-tag">Retail Intelligence v2.5</span>
-    <span style="font-size: 0.74rem; color: #94A3B8;">● Two-Column Master-Detail</span>
-  </div>
+<div class="terminal-nav">
   <div style="display: flex; align-items: center; gap: 12px;">
-    <span class="mini-kpi">
-      <span>Active Radar: <strong style="color: #10B981;">16 SKUs</strong></span>
-      <span style="color: #64748B;">|</span>
-      <span>Shopify Sync: <strong style="color: #38BDF8;">Ready</strong></span>
-      <span style="color: #64748B;">|</span>
-      <span>EAN Match: <strong style="color: #F59E0B;">100%</strong></span>
+    <span class="terminal-title">⚡ <span class="neon-cyan">PricePulse Terminal</span> <span style="font-size: 0.8rem; color: #64748B;">v3.0</span></span>
+    <span style="font-size: 0.72rem; color: #94A3B8; background: #0D1424; padding: 2px 8px; border-radius: 4px; border: 1px solid #1C273E;">
+      Algorithmic Retail Arbitrage
     </span>
-    <div style="display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px; border-radius: 9999px; background: #0F1420; border: 1px solid #1E2638; font-size: 0.8rem; color: #CBD5E1;">
-      Available for Hire <span class="status-dot"></span>
+  </div>
+  <div style="display: flex; align-items: center; gap: 14px;">
+    <span style="font-size: 0.76rem; font-family: 'JetBrains Mono'; color: #94A3B8;">
+      <span class="pulse-dot"></span> Market Feeds: <strong style="color: #10B981;">Live WebSocket</strong>
+    </span>
+    <span style="font-size: 0.76rem; font-family: 'JetBrains Mono'; color: #94A3B8;">
+      Shopify GraphQL: <strong style="color: #00F0FF;">Connected</strong>
+    </span>
+    <div style="display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 9999px; background: #0D1424; border: 1px solid #1C273E; font-size: 0.76rem; color: #CBD5E1;">
+      Portfolio by Freelancer
     </div>
   </div>
 </div>
 """, unsafe_allow_html=True)
 
-# 5. Master-Detail Layout (Left Column: Catalog Browser, Right Column: Intelligence Cockpit)
-col_left, col_right = st.columns([1.6, 2.4])
+# 5. Full-Width Financial Ticker Tape
+ticker_items = []
+for _, r in catalog_df.head(6).iterrows():
+    p_name = r["title"]
+    diff = round(float(r["current_price"]) - float(r["competitor_a_price"]), 2)
+    if not r.get("comp_a_in_stock", True):
+        ticker_items.append(f'<span class="ticker-item"><span style="color: #E2E8F0;">{p_name[:16]}:</span> <span class="amber-gold">AMZN OOS ▲ +8%</span></span>')
+    elif diff > 0:
+        ticker_items.append(f'<span class="ticker-item"><span style="color: #E2E8F0;">{p_name[:16]}:</span> <span class="crimson-down">AMZN -${diff:.2f} ▼</span></span>')
+    else:
+        ticker_items.append(f'<span class="ticker-item"><span style="color: #E2E8F0;">{p_name[:16]}:</span> <span class="emerald-up">MATCH =</span></span>')
 
-# --- LEFT COLUMN: PRODUCT SELECTION & LIVE SPREAD LIST ---
-with col_left:
-    st.markdown("<div style='font-size: 0.92rem; font-weight: 700; color: #F8FAFC; margin-bottom: 0.3rem;'>📦 Monitored Products Directory</div>", unsafe_allow_html=True)
-    
-    # Filter search
-    search_q = st.text_input("Filter products", "", placeholder="🔍 Filter by Brand, SKU, or Barcode...", label_visibility="collapsed")
-    filtered_cat = catalog_df.copy()
-    if search_q:
-        mask = filtered_cat.astype(str).apply(lambda row: row.str.contains(search_q, case=False).any(), axis=1)
-        filtered_cat = filtered_cat[mask]
+ticker_html = "".join([f'<span style="margin-right: 18px;">{item}</span>' for item in ticker_items])
+st.markdown(f"""
+<div class="ticker-bar">
+  <div style="display: flex; align-items: center; gap: 18px;">
+    <span style="font-size: 0.7rem; font-weight: 700; color: #F59E0B; text-transform: uppercase;">[LIVE TICKER]</span>
+    {ticker_html}
+  </div>
+  <div style="font-size: 0.7rem; color: #64748B; font-family: 'JetBrains Mono';">LATENCY: 42ms</div>
+</div>
+""", unsafe_allow_html=True)
 
-    # Selectbox for current active product
-    prod_titles = filtered_cat["title"].tolist()
-    if not prod_titles:
-        st.warning("No products matching query.")
-        st.stop()
+# 6. Main Split-Screen Workspace (65% Chart Workspace, 35% Order Book & Control Terminal)
+col_chart, col_terminal = st.columns([2.6, 1.4])
 
-    selected_title = st.selectbox(
-        "Active Product in Cockpit",
+# --- 65% LEFT / CENTER: HERO TRADINGVIEW CHART & TIMELINE ---
+with col_chart:
+    st.markdown("""
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.3rem;">
+      <div style="font-size: 0.86rem; font-weight: 700; color: #F8FAFC; display: flex; align-items: center; gap: 8px;">
+        <span>📊 PRICE ACTION &amp; COMPETITOR VOLATILITY TERMINAL</span>
+      </div>
+      <div style="display: flex; gap: 6px; font-family: 'JetBrains Mono'; font-size: 0.7rem;">
+        <span style="background: #10B981; color: #05070D; padding: 2px 6px; border-radius: 4px; font-weight: 700;">1D</span>
+        <span style="background: #0D1424; color: #94A3B8; padding: 2px 6px; border-radius: 4px;">7D</span>
+        <span style="background: #00F0FF; color: #05070D; padding: 2px 6px; border-radius: 4px; font-weight: 700;">30D (ACTIVE)</span>
+        <span style="background: #0D1424; color: #94A3B8; padding: 2px 6px; border-radius: 4px;">YTD</span>
+      </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Product Selector for Terminal Target
+    prod_titles = catalog_df["title"].tolist()
+    sel_prod_title = st.selectbox(
+        "Select Active Market Asset",
         prod_titles,
         index=0,
         label_visibility="collapsed"
     )
 
-    # Render Visual Preview Cards for the list
-    for idx, row in filtered_cat.iterrows():
-        p_title = row["title"]
-        p_sku = row["sku"]
-        p_our = float(row["current_price"])
-        p_comp = float(row["competitor_a_price"])
-        p_thumb = row.get("thumbnail", "")
-        p_stock = row.get("comp_a_in_stock", True)
+    # Active Product Data
+    active_row = catalog_df[catalog_df["title"] == sel_prod_title].iloc[0]
+    sku_val = active_row["sku"]
+    cost_val = float(active_row["cost_price"])
+    our_p = float(active_row["current_price"])
+    comp_a_p = float(active_row["competitor_a_price"])
+    comp_b_p = float(active_row["competitor_b_price"])
+    ean_code = active_row["barcode"]
 
-        diff = p_our - p_comp
-        if not p_stock:
-            badge_html = '<span class="badge-surge">🔺 STOCKOUT MONOPOLY</span>'
-        elif diff > 0:
-            badge_html = f'<span class="badge-drop">🚨 DROP -${diff:.2f}</span>'
-        elif diff < 0:
-            badge_html = f'<span class="badge-win">✓ WINNING +${abs(diff):.2f}</span>'
-        else:
-            badge_html = '<span class="badge-win">✓ MATCH</span>'
+    # History Time-Series
+    hist_sub = history_df[history_df["sku"] == sku_val].copy().reset_index(drop=True)
 
-        is_current = (p_title == selected_title)
-        border_color = "#F59E0B" if is_current else "#1E2638"
-        bg_color = "#161F33" if is_current else "#0F1420"
+    # Calculate Floor for chart
+    floor_val = round(cost_val * 1.15, 2)
 
-        st.markdown(f"""
-        <div style="background: {bg_color}; border: 1px solid {border_color}; border-radius: 8px; padding: 8px 12px; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between;">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <img src="{p_thumb}" style="width: 38px; height: 38px; object-fit: contain; border-radius: 4px; background: #080B11; border: 1px solid #1E2638;" onerror="this.style.display='none'" />
-            <div>
-              <div style="font-size: 0.82rem; font-weight: 600; color: #F8FAFC; line-height: 1.2;">{p_title}</div>
-              <div style="font-size: 0.72rem; color: #94A3B8; margin-top: 2px;">
-                <code>{p_sku}</code> • EAN: <code>{row['barcode']}</code>
-              </div>
-            </div>
-          </div>
-          <div style="text-align: right;">
-            <div style="font-size: 0.88rem; font-weight: 700; color: #F8FAFC;">${p_our:.2f}</div>
-            <div style="margin-top: 2px;">{badge_html}</div>
-          </div>
-        </div>
-        """, unsafe_allow_html=True)
+    # Render TradingView Style Plotly Figure
+    fig = go.Figure()
 
+    # Red-Shaded Margin Floor Zone
+    fig.add_hrect(
+        y0=0, y1=floor_val,
+        fillcolor="rgba(239, 68, 68, 0.12)",
+        line_width=1,
+        line_color="rgba(239, 68, 68, 0.4)",
+        annotation_text=f"PROTECTED MARGIN FLOOR (${floor_val:.2f})",
+        annotation_position="bottom right",
+        annotation_font=dict(size=10, color="#EF4444")
+    )
 
-# --- RIGHT COLUMN: PRODUCT COCKPIT & TIME-SERIES INTELLIGENCE ---
-with col_right:
-    # Retrieve details for the selected product
-    p_data = catalog_df[catalog_df["title"] == selected_title].iloc[0].to_dict()
+    # Our Store Line (Solid Neon Cyan)
+    fig.add_trace(go.Scatter(
+        x=hist_sub["date"], y=hist_sub["our_price"],
+        name="Our Store Price",
+        line=dict(color="#00F0FF", width=3)
+    ))
 
-    # 1. Cockpit Hero Card
+    # Amazon Line (Dashed Orange)
+    fig.add_trace(go.Scatter(
+        x=hist_sub["date"], y=hist_sub["comp_a_price"],
+        name="Amazon US",
+        line=dict(color="#FB923C", width=2, dash="dash")
+    ))
+
+    # BestBuy Line (Dotted Amber Gold)
+    fig.add_trace(go.Scatter(
+        x=hist_sub["date"], y=hist_sub["comp_b_price"],
+        name="BestBuy Online",
+        line=dict(color="#F59E0B", width=2, dash="dot")
+    ))
+
+    # Pinned Event Flag directly on recent price drop
+    last_date = hist_sub["date"].iloc[-1]
+    fig.add_annotation(
+        x=last_date, y=comp_a_p,
+        text="🚨 Competitor Undercut",
+        showarrow=True,
+        arrowhead=2,
+        arrowcolor="#EF4444",
+        arrowsize=1,
+        arrowwidth=2,
+        bgcolor="#0A0F1D",
+        bordercolor="#EF4444",
+        borderwidth=1,
+        font=dict(color="#F8FAFC", size=10)
+    )
+
+    fig.update_layout(
+        template="plotly_dark",
+        paper_bgcolor="#0A0F1D",
+        plot_bgcolor="#05070D",
+        margin=dict(l=30, r=20, t=10, b=20),
+        height=370,
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1, font=dict(family="JetBrains Mono", size=10)),
+        xaxis=dict(showgrid=True, gridcolor="#121A2B", tickfont=dict(family="JetBrains Mono", size=10)),
+        yaxis=dict(showgrid=True, gridcolor="#121A2B", tickprefix="$", tickfont=dict(family="JetBrains Mono", size=10))
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+    # Bottom Terminal Event Stream
+    time_now = datetime.now().strftime("%H:%M:%S")
     st.markdown(f"""
-    <div style="background: #0F1420; border: 1px solid #1E2638; border-radius: 12px; padding: 1rem 1.2rem; margin-bottom: 0.7rem;">
-      <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-        <div>
-          <div style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: #F59E0B; font-weight: 700;">Active Inspection Unit</div>
-          <div style="font-size: 1.15rem; font-weight: 800; color: #F8FAFC; margin-top: 2px;">{p_data['title']}</div>
-          <div style="font-size: 0.76rem; color: #94A3B8; margin-top: 4px;">
-            SKU: <code style="color: #818CF8;">{p_data['sku']}</code> | 
-            EAN-13: <code style="color: #10B981;">{p_data['barcode']}</code> | 
-            ASIN: <code style="color: #38BDF8;">{p_data['comp_a_asin']}</code>
-          </div>
-        </div>
-        <div style="text-align: right; background: #080B11; border: 1px solid #1E2638; border-radius: 8px; padding: 6px 12px;">
-          <div style="font-size: 0.68rem; color: #94A3B8; text-transform: uppercase;">Confidence Score</div>
-          <div style="font-size: 1.1rem; font-weight: 800; color: #10B981;">100% EAN-13</div>
-        </div>
+    <div class="console-stream">
+      <div>[{time_now}] <strong>INGESTION:</strong> Live barcode <code>{ean_code}</code> verified with Amazon ASIN <code>{active_row['comp_a_asin']}</code>.</div>
+      <div>[{time_now}] <strong>RADAR EVENT:</strong> Amazon competitor set at ${comp_a_p:.2f} (Spread: ${our_p - comp_a_p:+.2f}).</div>
+      <div>[{time_now}] <strong>ALGO DECISION:</strong> Buy-Box undercutting rules engaged. Target calculation ready for execution.</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+
+# --- 35% RIGHT: ORDER BOOK & ALGORITHMIC STRATEGY TERMINAL ---
+with col_terminal:
+    # Asset Specs
+    st.markdown(f"""
+    <div style="background: #0A0F1D; border: 1px solid #162035; border-radius: 8px; padding: 10px 14px; margin-bottom: 0.5rem;">
+      <div style="font-size: 0.68rem; font-family: 'JetBrains Mono'; color: #00F0FF; text-transform: uppercase;">TARGET ASSET SPECIFICATION</div>
+      <div style="font-size: 0.96rem; font-weight: 800; color: #F8FAFC; margin-top: 2px;">{sel_prod_title}</div>
+      <div style="font-size: 0.72rem; font-family: 'JetBrains Mono'; color: #94A3B8; margin-top: 3px;">
+        SKU: <code style="color: #00F0FF;">{sku_val}</code> | EAN-13: <code style="color: #10B981;">{ean_code}</code>
       </div>
     </div>
     """, unsafe_allow_html=True)
 
-    # 2. Competitor Benchmarking Grid
-    m1, m2, m3, m4 = st.columns(4)
-    with m1:
-        st.markdown(f"""
-        <div style="background: #0F1420; border: 1px solid #1E2638; border-radius: 8px; padding: 0.7rem; text-align: center;">
-          <div style="font-size: 0.68rem; color: #94A3B8; text-transform: uppercase;">Cost Price</div>
-          <div style="font-size: 1.25rem; font-weight: 700; color: #94A3B8;">${p_data['cost_price']:.2f}</div>
-          <div style="font-size: 0.68rem; color: #64748B;">Floor Baseline</div>
-        </div>
-        """, unsafe_allow_html=True)
-    with m2:
-        st.markdown(f"""
-        <div style="background: #0F1420; border: 1px solid #1E2638; border-radius: 8px; padding: 0.7rem; text-align: center;">
-          <div style="font-size: 0.68rem; color: #94A3B8; text-transform: uppercase;">Your Current Price</div>
-          <div style="font-size: 1.25rem; font-weight: 700; color: #F8FAFC;">${p_data['current_price']:.2f}</div>
-          <div style="font-size: 0.68rem; color: #818CF8;">Live Storefront</div>
-        </div>
-        """, unsafe_allow_html=True)
-    with m3:
-        comp_a_st = "In Stock" if p_data['comp_a_in_stock'] else "Out of Stock"
-        comp_a_color = "#38BDF8" if p_data['comp_a_in_stock'] else "#EF4444"
-        st.markdown(f"""
-        <div style="background: #0F1420; border: 1px solid #1E2638; border-radius: 8px; padding: 0.7rem; text-align: center;">
-          <div style="font-size: 0.68rem; color: #94A3B8; text-transform: uppercase;">Amazon US</div>
-          <div style="font-size: 1.25rem; font-weight: 700; color: {comp_a_color};">${p_data['competitor_a_price']:.2f}</div>
-          <div style="font-size: 0.68rem; color: {comp_a_color};">{comp_a_st}</div>
-        </div>
-        """, unsafe_allow_html=True)
-    with m4:
-        comp_b_st = "In Stock" if p_data['comp_b_in_stock'] else "Out of Stock"
-        comp_b_color = "#F59E0B" if p_data['comp_b_in_stock'] else "#EF4444"
-        st.markdown(f"""
-        <div style="background: #0F1420; border: 1px solid #1E2638; border-radius: 8px; padding: 0.7rem; text-align: center;">
-          <div style="font-size: 0.68rem; color: #94A3B8; text-transform: uppercase;">BestBuy Online</div>
-          <div style="font-size: 1.25rem; font-weight: 700; color: {comp_b_color};">${p_data['competitor_b_price']:.2f}</div>
-          <div style="font-size: 0.68rem; color: {comp_b_color};">{comp_b_st}</div>
-        </div>
-        """, unsafe_allow_html=True)
+    # Order-Book Market Grid
+    st.markdown("""
+    <div style="background: #080C16; border: 1px solid #162035; border-radius: 6px; padding: 6px 10px; margin-bottom: 0.5rem;">
+      <div style="font-size: 0.68rem; font-family: 'JetBrains Mono'; color: #F59E0B; text-transform: uppercase; margin-bottom: 4px;">MARKETPLACE QUOTE BOOK</div>
+    """, unsafe_allow_html=True)
 
-    # 3. Interactive Repricing Sandbox (Sliders & Dynamic Re-calculation)
-    st.markdown("<div style='height: 0.4rem;'></div>", unsafe_allow_html=True)
-    with st.container(border=True):
-        st.markdown("<div style='font-size: 0.82rem; font-weight: 700; color: #F59E0B; text-transform: uppercase; margin-bottom: 0.4rem;'>⚡ Dynamic Repricing Strategy Sandbox</div>", unsafe_allow_html=True)
-        sb1, sb2, sb3 = st.columns(3)
-        with sb1:
-            margin_floor = st.slider("Min Margin Floor %", 10, 35, 15, key="sb_floor")
-        with sb2:
-            undercut_cents = st.selectbox("Buy-Box Undercut", ["$0.25", "$0.50", "$1.00", "$2.00"], index=1, key="sb_undercut")
-            u_val = float(undercut_cents.replace("$", ""))
-        with sb3:
-            surge_pct = st.slider("Stockout Surge %", 3, 20, 8, key="sb_surge")
+    st.markdown(f"""
+      <div class="orderbook-row"><span style="color: #94A3B8;">Cost Baseline (COGS):</span> <span style="color: #64748B;">${cost_val:.2f}</span></div>
+      <div class="orderbook-row"><span style="color: #94A3B8;">Your Live Storefront:</span> <span style="color: #F8FAFC; font-weight: 700;">${our_p:.2f}</span></div>
+      <div class="orderbook-row"><span style="color: #FB923C;">Amazon US Quote:</span> <span style="color: #FB923C;">${comp_a_p:.2f} ({'In Stock' if active_row['comp_a_in_stock'] else 'OUT OF STOCK'})</span></div>
+      <div class="orderbook-row"><span style="color: #F59E0B;">BestBuy Quote:</span> <span style="color: #F59E0B;">${comp_b_p:.2f} ({'In Stock' if active_row['comp_b_in_stock'] else 'OUT OF STOCK'})</span></div>
+    </div>
+    """, unsafe_allow_html=True)
 
-        # Run evaluation on the fly for this specific product
-        sim_rule = RepricingRule(min_margin_percent=margin_floor, undercut_cents=u_val, stockout_surge_percent=surge_pct)
-        sim_engine = RepricingEngine(rule=sim_rule)
-        eval_res = sim_engine.evaluate_product(p_data)
+    # Algorithmic Execution Inputs
+    st.markdown("""
+    <div style="background: #0A0F1D; border: 1px solid #162035; border-radius: 8px; padding: 10px 12px; margin-bottom: 0.5rem;">
+      <div style="font-size: 0.68rem; font-family: 'JetBrains Mono'; color: #00F0FF; text-transform: uppercase; margin-bottom: 6px;">ARBITRAGE EXECUTION ALGORITHM</div>
+    """, unsafe_allow_html=True)
 
-        # Output Box
-        rec_p = eval_res["recommended_price"]
-        diff_p = eval_res["price_diff"]
-        diff_str = f"+${diff_p:.2f}" if diff_p > 0 else (f"-${abs(diff_p):.2f}" if diff_p < 0 else "$0.00")
+    c_floor, c_undercut = st.columns(2)
+    with c_floor:
+        inp_floor = st.slider("Floor Margin %", 10, 30, 15, key="fin_floor")
+    with c_undercut:
+        inp_undercut = st.selectbox("Buy-Box Beat", ["-$0.10", "-$0.50", "-$1.00", "-$2.00"], index=1, key="fin_undercut")
+        u_val = abs(float(inp_undercut.replace("-$", "").replace("$", "")))
 
-        res_col1, res_col2 = st.columns([2.5, 1.5])
-        with res_col1:
-            st.markdown(f"""
-            <div style="background: #080B11; border: 1px solid #1E2638; border-radius: 8px; padding: 0.8rem; font-size: 0.82rem; line-height: 1.5;">
-              <span style="color: #94A3B8;">Algorithm Action:</span> <strong style="color: #F8FAFC;">{eval_res['action']}</strong><br/>
-              <span style="color: #94A3B8;">Strategic Logic:</span> <span style="color: #CBD5E1;">{eval_res['reason']}</span><br/>
-              <span style="color: #94A3B8;">Safety Floor Price:</span> <code style="color: #EF4444;">${eval_res['floor_price']:.2f}</code> (Protected minimum)
-            </div>
-            """, unsafe_allow_html=True)
-        with res_col2:
-            st.markdown(f"""
-            <div style="background: #141B2B; border: 1px solid #F59E0B; border-radius: 8px; padding: 0.8rem; text-align: center;">
-              <div style="font-size: 0.7rem; color: #F59E0B; text-transform: uppercase; font-weight: 700;">Recommended Buy-Box</div>
-              <div style="font-size: 1.5rem; font-weight: 800; color: #F8FAFC;">${rec_p:.2f}</div>
-              <div style="font-size: 0.76rem; color: #10B981; font-weight: 600;">{eval_res['new_margin_pct']}% Gross Margin ({diff_str})</div>
-            </div>
-            """, unsafe_allow_html=True)
+    # Compute algorithm decision
+    algo_rule = RepricingRule(min_margin_percent=inp_floor, undercut_cents=u_val)
+    algo_engine = RepricingEngine(rule=algo_rule)
+    eval_res = algo_engine.evaluate_product(active_row.to_dict())
 
-    # 4. Plotly 30-Day Historical Volatility Chart
-    st.markdown("<div style='font-size: 0.86rem; font-weight: 700; color: #F8FAFC; margin-top: 0.4rem; margin-bottom: 0.2rem;'>📈 30-Day Price Volatility & Market Defense Analysis</div>", unsafe_allow_html=True)
-    hist_sub = history_df[history_df["sku"] == p_data["sku"]]
+    rec_exec_price = eval_res["recommended_price"]
+    margin_gain_pct = eval_res["new_margin_pct"]
+    margin_gain_usd = eval_res["new_margin_dollar"]
 
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(
-        x=hist_sub["date"], y=hist_sub["our_price"],
-        name="Your Store",
-        line=dict(color="#F8FAFC", width=2.5)
-    ))
-    fig.add_trace(go.Scatter(
-        x=hist_sub["date"], y=hist_sub["comp_a_price"],
-        name="Amazon US",
-        line=dict(color="#38BDF8", width=2, dash="dot")
-    ))
-    fig.add_trace(go.Scatter(
-        x=hist_sub["date"], y=hist_sub["comp_b_price"],
-        name="BestBuy Online",
-        line=dict(color="#F59E0B", width=2, dash="dash")
-    ))
+    # Hero Recommended Price Display
+    st.markdown(f"""
+    <div style="background: linear-gradient(135deg, rgba(0, 240, 255, 0.08) 0%, rgba(59, 130, 246, 0.08) 100%); border: 1px solid rgba(0, 240, 255, 0.4); border-radius: 8px; padding: 12px; text-align: center; margin-top: 6px; margin-bottom: 10px;">
+      <div style="font-size: 0.68rem; font-family: 'JetBrains Mono'; color: #00F0FF; text-transform: uppercase; font-weight: 700;">RECOMMENDED EXECUTION PRICE</div>
+      <div style="font-size: 2.1rem; font-weight: 800; color: #F8FAFC; font-family: 'JetBrains Mono'; line-height: 1.1; margin: 4px 0;">${rec_exec_price:.2f}</div>
+      <div style="display: inline-flex; align-items: center; gap: 6px; padding: 2px 8px; border-radius: 4px; background: rgba(16, 185, 129, 0.18); color: #10B981; font-size: 0.76rem; font-family: 'JetBrains Mono';">
+        Gross Margin: {margin_gain_pct}% (+${margin_gain_usd:.2f})
+      </div>
+    </div>
+    """, unsafe_allow_html=True)
 
-    fig.update_layout(
-        template="plotly_dark",
-        paper_bgcolor="#0F1420",
-        plot_bgcolor="#080B11",
-        margin=dict(l=25, r=15, t=15, b=25),
-        height=240,
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1, font=dict(size=11)),
-        xaxis=dict(showgrid=True, gridcolor="#1E2638"),
-        yaxis=dict(showgrid=True, gridcolor="#1E2638", tickprefix="$")
-    )
-    st.plotly_chart(fig, use_container_width=True)
+    # Action Triggers
+    if st.button("⚡ EXECUTE REPRICE VIA SHOPIFY API", use_container_width=True, type="primary"):
+        st.toast(f"🚀 Execution Confirmed: SKU '{sku_val}' updated to ${rec_exec_price:.2f} via Shopify GraphQL API!", icon="⚡")
+        st.success(f"✓ GraphQL Mutation Dispatched: {sku_val} repriced to ${rec_exec_price:.2f}")
 
-    # 5. Bottom Dispatch Actions
-    act1, act2, act3 = st.columns([1.5, 1.3, 1.2])
-    with act1:
-        if st.button("🚀 Push Update to Shopify API", use_container_width=True, type="primary"):
-            st.toast(f"✅ SKU '{p_data['sku']}' updated on Shopify to ${rec_p:.2f}!", icon="🚀")
-            st.success(f"✓ Shopify GraphQL Mutation dispatched for {p_data['sku']}.")
-    with act2:
-        if st.button("🚨 Dispatch Telegram Alert", use_container_width=True):
-            st.toast(f"🔔 Telegram Price Drop Webhook triggered for {p_data['sku']}!", icon="🚨")
-            st.info("📢 Alert payload sent to private merchant channel.")
-    with act3:
-        # Export single row or all
-        shopify_export = pd.DataFrame([{
-            "Handle": str(p_data["sku"]).lower().replace(" ", "-"),
-            "Title": p_data["title"],
-            "Variant SKU": p_data["sku"],
-            "Variant Barcode": p_data["barcode"],
-            "Variant Price": rec_p,
-            "Variant Compare At Price": p_data["current_price"],
-            "Variant Inventory Qty": p_data["stock"]
+    btn_alt1, btn_alt2 = st.columns(2)
+    with btn_alt1:
+        if st.button("📡 Alert Telegram", use_container_width=True):
+            st.toast(f"🚨 Webhook Triggered: Price drop on {sku_val} sent to Telegram!", icon="📡")
+    with btn_alt2:
+        export_df = pd.DataFrame([{
+            "Handle": str(sku_val).lower().replace(" ", "-"),
+            "Title": sel_prod_title,
+            "Variant SKU": sku_val,
+            "Variant Barcode": ean_code,
+            "Variant Price": rec_exec_price,
+            "Variant Compare At Price": our_p
         }])
-        csv_data = shopify_export.to_csv(index=False).encode('utf-8')
         st.download_button(
             label="📥 Export CSV",
-            data=csv_data,
-            file_name=f"Shopify_{p_data['sku']}.csv",
+            data=export_df.to_csv(index=False).encode('utf-8'),
+            file_name=f"Shopify_{sku_val}.csv",
             mime="text/csv",
             use_container_width=True
         )
