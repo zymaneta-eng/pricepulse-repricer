@@ -418,8 +418,8 @@
         <!-- Dual High-Contrast Sleek Smartphone Miniatures -->
         <div class="flex items-center justify-between bg-[#0B0F19] border border-[#1F293D] rounded-lg p-2.5">
           <div class="flex items-center gap-2.5">
-            <div class="w-10 h-10 rounded-lg bg-[#121826] border border-[#1F293D] flex items-center justify-center p-1 shadow-inner relative overflow-hidden">
-              <img id="thumb-our" src="https://cdn.dummyjson.com/product-images/smartphones/iphone-5s/thumbnail.webp" alt="Our Item" class="w-full h-full object-contain rounded" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=100&q=80'">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-b from-[#182234] to-[#0E1524] border border-[#2A374F] flex items-center justify-center p-1 shadow-md relative overflow-hidden">
+              <img id="thumb-our" src="https://cdn.dummyjson.com/products/images/smartphones/iPhone%205s/thumbnail.png" alt="Our Item" class="w-full h-full object-contain filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
             </div>
             <div class="flex flex-col">
               <span class="text-xs font-bold text-[#F8FAFC]">Our Store</span>
@@ -429,7 +429,7 @@
 
           <div class="flex flex-col items-center px-1.5">
             <i data-lucide="arrow-left-right" class="w-4 h-4 text-[#38BDF8]"></i>
-            <span class="px-1.5 py-0.5 bg-emerald-950/60 border border-emerald-500/40 text-emerald-400 text-[9px] font-mono font-bold rounded mt-1 whitespace-nowrap">
+            <span class="px-2 py-0.5 bg-emerald-950/70 border border-emerald-500/50 text-emerald-400 text-[9px] font-mono font-bold rounded-full mt-1 whitespace-nowrap shadow-sm">
               100% EAN-13 Match
             </span>
           </div>
@@ -439,8 +439,8 @@
               <span class="text-xs font-bold text-[#F8FAFC]">Competitor</span>
               <span class="text-[10px] text-slate-400 font-mono">Amazon / BBY</span>
             </div>
-            <div class="w-10 h-10 rounded-lg bg-[#121826] border border-[#1F293D] flex items-center justify-center p-1 shadow-inner relative overflow-hidden">
-              <img id="thumb-comp" src="https://cdn.dummyjson.com/product-images/smartphones/iphone-5s/thumbnail.webp" alt="Competitor Item" class="w-full h-full object-contain rounded" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=100&q=80'">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-b from-[#182234] to-[#0E1524] border border-[#2A374F] flex items-center justify-center p-1 shadow-md relative overflow-hidden">
+              <img id="thumb-comp" src="https://cdn.dummyjson.com/products/images/smartphones/iPhone%205s/thumbnail.png" alt="Competitor Item" class="w-full h-full object-contain filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
             </div>
           </div>
         </div>
@@ -553,22 +553,22 @@
   <script>
     // Complete Ground-Truth Products Dataset
     const PRODUCTS = [
-      { id: 1, sku: 'SMA-APP-IPH-121', brand: 'Apple', title: 'Apple iPhone 5s', barcode: '8814683940853', cost: 143.99, storePrice: 199.99, amzn: 203.99, bby: 191.99, thumb: 'https://cdn.dummyjson.com/product-images/smartphones/iphone-5s/thumbnail.webp', history: [199.99, 198.50, 196.00, 191.99, 191.49] },
-      { id: 2, sku: 'SMA-APP-IPH-122', brand: 'Apple', title: 'Apple iPhone 6', barcode: '9922357685013', cost: 215.99, storePrice: 299.99, amzn: 295.99, bby: 299.99, thumb: 'https://cdn.dummyjson.com/product-images/smartphones/iphone-6/thumbnail.webp', history: [299.99, 299.00, 297.50, 295.99, 295.49] },
-      { id: 3, sku: 'SMA-APP-IPH-123', brand: 'Apple', title: 'Apple iPhone 13 Pro', barcode: '4998438802308', cost: 791.99, storePrice: 1099.99, amzn: 1084.49, bby: 1104.99, thumb: 'https://cdn.dummyjson.com/product-images/smartphones/iphone-13-pro/thumbnail.webp', history: [1105.00, 1099.99, 1092.00, 1084.49, 1083.99] },
-      { id: 4, sku: 'SMA-APP-IPH-124', brand: 'Apple', title: 'Apple iPhone X', barcode: '3034949322264', cost: 647.99, storePrice: 899.99, amzn: 889.99, bby: 905.00, thumb: 'https://cdn.dummyjson.com/product-images/smartphones/iphone-x/thumbnail.webp', history: [905.00, 899.99, 895.00, 889.99, 889.49] },
-      { id: 5, sku: 'SMA-OPP-OPP-125', brand: 'Oppo', title: 'Oppo Oppo A57', barcode: '651223722522', cost: 179.99, storePrice: 249.99, amzn: 249.99, bby: 254.99, thumb: 'https://cdn.dummyjson.com/product-images/smartphones/oppo-a57/thumbnail.webp', history: [249.99, 249.99, 249.99, 249.99, 249.99] },
-      { id: 6, sku: 'SMA-OPP-OPP-126', brand: 'Oppo', title: 'Oppo Oppo F19 Pro Plus', barcode: '8576893968169', cost: 287.99, storePrice: 399.99, amzn: 394.99, bby: 399.99, thumb: 'https://cdn.dummyjson.com/product-images/smartphones/oppo-f19-pro-plus/thumbnail.webp', history: [399.99, 398.00, 396.00, 394.99, 394.49] },
-      { id: 7, sku: 'SMA-OPP-OPP-127', brand: 'Oppo', title: 'Oppo Oppo K1', barcode: '3106827888743', cost: 215.99, storePrice: 299.99, amzn: 299.99, bby: 305.00, thumb: 'https://cdn.dummyjson.com/product-images/smartphones/oppo-k1/thumbnail.webp', history: [305.00, 302.00, 299.99, 299.99, 299.99] },
-      { id: 8, sku: 'SMA-REA-REA-128', brand: 'Realme', title: 'Realme Realme C35', barcode: '7825844344364', cost: 107.99, storePrice: 149.99, amzn: 153.99, bby: 149.99, thumb: 'https://cdn.dummyjson.com/product-images/smartphones/realme-c35/thumbnail.webp', history: [153.99, 151.00, 149.99, 149.99, 149.49] },
-      { id: 9, sku: 'SMA-REA-REA-129', brand: 'Realme', title: 'Realme Realme X', barcode: '4948452391831', cost: 215.99, storePrice: 299.99, amzn: 291.99, bby: 299.99, thumb: 'https://cdn.dummyjson.com/product-images/smartphones/realme-x/thumbnail.webp', history: [299.99, 295.00, 293.00, 291.99, 291.49] },
-      { id: 10, sku: 'SMA-REA-REA-130', brand: 'Realme', title: 'Realme Realme XT', barcode: '6151817227632', cost: 251.99, storePrice: 349.99, amzn: 344.99, bby: 349.99, thumb: 'https://cdn.dummyjson.com/product-images/smartphones/realme-xt/thumbnail.webp', history: [349.99, 347.00, 345.50, 344.99, 344.49] },
-      { id: 11, sku: 'SMA-SAM-SAM-131', brand: 'Samsung', title: 'Samsung Galaxy S7', barcode: '7557912146622', cost: 215.99, storePrice: 299.99, amzn: 295.99, bby: 299.99, thumb: 'https://cdn.dummyjson.com/product-images/smartphones/samsung-galaxy-s7/thumbnail.webp', history: [299.99, 298.00, 296.50, 295.99, 295.49] },
-      { id: 12, sku: 'SMA-SAM-SAM-132', brand: 'Samsung', title: 'Samsung Galaxy S8', barcode: '5995499013336', cost: 359.99, storePrice: 499.99, amzn: 489.99, bby: 495.00, thumb: 'https://cdn.dummyjson.com/product-images/smartphones/samsung-galaxy-s8/thumbnail.webp', history: [495.00, 492.00, 490.50, 489.99, 489.49] },
-      { id: 13, sku: 'SMA-SAM-SAM-133', brand: 'Samsung', title: 'Samsung Galaxy S10', barcode: '4676898229465', cost: 503.99, storePrice: 699.99, amzn: 689.99, bby: 699.99, thumb: 'https://cdn.dummyjson.com/product-images/smartphones/samsung-galaxy-s10/thumbnail.webp', history: [699.99, 695.00, 692.00, 689.99, 689.49] },
-      { id: 14, sku: 'SMA-VIV-VIV-134', brand: 'Vivo', title: 'Vivo Vivo S1', barcode: '8575699153333', cost: 179.99, storePrice: 249.99, amzn: 245.99, bby: 249.99, thumb: 'https://cdn.dummyjson.com/product-images/smartphones/vivo-s1/thumbnail.webp', history: [249.99, 248.00, 246.50, 245.99, 245.49] },
-      { id: 15, sku: 'SMA-VIV-VIV-135', brand: 'Vivo', title: 'Vivo Vivo V9', barcode: '4295398764784', cost: 215.99, storePrice: 299.99, amzn: 294.99, bby: 299.99, thumb: 'https://cdn.dummyjson.com/product-images/smartphones/vivo-v9/thumbnail.webp', history: [299.99, 297.00, 295.50, 294.99, 294.49] },
-      { id: 16, sku: 'SMA-VIV-VIV-136', brand: 'Vivo', title: 'Vivo Vivo X21', barcode: '9944308291810', cost: 359.99, storePrice: 499.99, amzn: 489.99, bby: 499.99, thumb: 'https://cdn.dummyjson.com/product-images/smartphones/vivo-x21/thumbnail.webp', history: [499.99, 495.00, 492.00, 489.99, 489.49] }
+      { id: 1, sku: 'SMA-APP-IPH-121', brand: 'Apple', title: 'Apple iPhone 5s', barcode: '8814683940853', cost: 143.99, storePrice: 199.99, amzn: 203.99, bby: 191.99, thumb: 'https://cdn.dummyjson.com/products/images/smartphones/iPhone%205s/thumbnail.png', history: [199.99, 198.50, 196.00, 191.99, 191.49] },
+      { id: 2, sku: 'SMA-APP-IPH-122', brand: 'Apple', title: 'Apple iPhone 6', barcode: '9922357685013', cost: 215.99, storePrice: 299.99, amzn: 295.99, bby: 299.99, thumb: 'https://cdn.dummyjson.com/products/images/smartphones/iPhone%206/thumbnail.png', history: [299.99, 299.00, 297.50, 295.99, 295.49] },
+      { id: 3, sku: 'SMA-APP-IPH-123', brand: 'Apple', title: 'Apple iPhone 13 Pro', barcode: '4998438802308', cost: 791.99, storePrice: 1099.99, amzn: 1084.49, bby: 1104.99, thumb: 'https://cdn.dummyjson.com/products/images/smartphones/iPhone%2013%20Pro/thumbnail.png', history: [1105.00, 1099.99, 1092.00, 1084.49, 1083.99] },
+      { id: 4, sku: 'SMA-APP-IPH-124', brand: 'Apple', title: 'Apple iPhone X', barcode: '3034949322264', cost: 647.99, storePrice: 899.99, amzn: 889.99, bby: 905.00, thumb: 'https://cdn.dummyjson.com/products/images/smartphones/iPhone%20X/thumbnail.png', history: [905.00, 899.99, 895.00, 889.99, 889.49] },
+      { id: 5, sku: 'SMA-OPP-OPP-125', brand: 'Oppo', title: 'Oppo Oppo A57', barcode: '651223722522', cost: 179.99, storePrice: 249.99, amzn: 249.99, bby: 254.99, thumb: 'https://cdn.dummyjson.com/products/images/smartphones/Oppo%20A57/thumbnail.png', history: [249.99, 249.99, 249.99, 249.99, 249.99] },
+      { id: 6, sku: 'SMA-OPP-OPP-126', brand: 'Oppo', title: 'Oppo Oppo F19 Pro Plus', barcode: '8576893968169', cost: 287.99, storePrice: 399.99, amzn: 394.99, bby: 399.99, thumb: 'https://cdn.dummyjson.com/products/images/smartphones/Oppo%20F19%20Pro%20Plus/thumbnail.png', history: [399.99, 398.00, 396.00, 394.99, 394.49] },
+      { id: 7, sku: 'SMA-OPP-OPP-127', brand: 'Oppo', title: 'Oppo Oppo K1', barcode: '3106827888743', cost: 215.99, storePrice: 299.99, amzn: 299.99, bby: 305.00, thumb: 'https://cdn.dummyjson.com/products/images/smartphones/Oppo%20K1/thumbnail.png', history: [305.00, 302.00, 299.99, 299.99, 299.99] },
+      { id: 8, sku: 'SMA-REA-REA-128', brand: 'Realme', title: 'Realme Realme C35', barcode: '7825844344364', cost: 107.99, storePrice: 149.99, amzn: 153.99, bby: 149.99, thumb: 'https://cdn.dummyjson.com/products/images/smartphones/Realme%20C35/thumbnail.png', history: [153.99, 151.00, 149.99, 149.99, 149.49] },
+      { id: 9, sku: 'SMA-REA-REA-129', brand: 'Realme', title: 'Realme Realme X', barcode: '4948452391831', cost: 215.99, storePrice: 299.99, amzn: 291.99, bby: 299.99, thumb: 'https://cdn.dummyjson.com/products/images/smartphones/Realme%20X/thumbnail.png', history: [299.99, 295.00, 293.00, 291.99, 291.49] },
+      { id: 10, sku: 'SMA-REA-REA-130', brand: 'Realme', title: 'Realme Realme XT', barcode: '6151817227632', cost: 251.99, storePrice: 349.99, amzn: 344.99, bby: 349.99, thumb: 'https://cdn.dummyjson.com/products/images/smartphones/Realme%20XT/thumbnail.png', history: [349.99, 347.00, 345.50, 344.99, 344.49] },
+      { id: 11, sku: 'SMA-SAM-SAM-131', brand: 'Samsung', title: 'Samsung Galaxy S7', barcode: '7557912146622', cost: 215.99, storePrice: 299.99, amzn: 295.99, bby: 299.99, thumb: 'https://cdn.dummyjson.com/products/images/smartphones/Samsung%20Galaxy%20S7/thumbnail.png', history: [299.99, 298.00, 296.50, 295.99, 295.49] },
+      { id: 12, sku: 'SMA-SAM-SAM-132', brand: 'Samsung', title: 'Samsung Galaxy S8', barcode: '5995499013336', cost: 359.99, storePrice: 499.99, amzn: 489.99, bby: 495.00, thumb: 'https://cdn.dummyjson.com/products/images/smartphones/Samsung%20Galaxy%20S8/thumbnail.png', history: [495.00, 492.00, 490.50, 489.99, 489.49] },
+      { id: 13, sku: 'SMA-SAM-SAM-133', brand: 'Samsung', title: 'Samsung Galaxy S10', barcode: '4676898229465', cost: 503.99, storePrice: 699.99, amzn: 689.99, bby: 699.99, thumb: 'https://cdn.dummyjson.com/products/images/smartphones/Samsung%20Galaxy%20S10/thumbnail.png', history: [699.99, 695.00, 692.00, 689.99, 689.49] },
+      { id: 14, sku: 'SMA-VIV-VIV-134', brand: 'Vivo', title: 'Vivo Vivo S1', barcode: '8575699153333', cost: 179.99, storePrice: 249.99, amzn: 245.99, bby: 249.99, thumb: 'https://cdn.dummyjson.com/products/images/smartphones/Vivo%20S1/thumbnail.png', history: [249.99, 248.00, 246.50, 245.99, 245.49] },
+      { id: 15, sku: 'SMA-VIV-VIV-135', brand: 'Vivo', title: 'Vivo Vivo V9', barcode: '4295398764784', cost: 215.99, storePrice: 299.99, amzn: 294.99, bby: 299.99, thumb: 'https://cdn.dummyjson.com/products/images/smartphones/Vivo%20V9/thumbnail.png', history: [299.99, 297.00, 295.50, 294.99, 294.49] },
+      { id: 16, sku: 'SMA-VIV-VIV-136', brand: 'Vivo', title: 'Vivo Vivo X21', barcode: '9944308291810', cost: 359.99, storePrice: 499.99, amzn: 489.99, bby: 499.99, thumb: 'https://cdn.dummyjson.com/products/images/smartphones/Vivo%20X21/thumbnail.png', history: [499.99, 495.00, 492.00, 489.99, 489.49] }
     ];
 
     let currentSelectedSku = 'SMA-APP-IPH-121';
@@ -886,16 +886,19 @@
         btnChart.className = 'flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-md bg-[#4F46E5] text-white shadow transition';
         cChart.classList.remove('hidden');
         cCat.classList.add('hidden');
+        cCat.style.marginTop = '0px';
         document.getElementById('active-panel-heading').innerText = 'Market Defense Chart Analysis';
       } else if (mode === 'catalog') {
         btnCat.className = 'flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-md bg-[#4F46E5] text-white shadow transition';
         cChart.classList.add('hidden');
         cCat.classList.remove('hidden');
+        cCat.style.marginTop = '0px';
         document.getElementById('active-panel-heading').innerText = 'Interactive Catalog Registry';
       } else if (mode === 'split') {
         btnSplit.className = 'flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-md bg-[#4F46E5] text-white shadow transition';
         cChart.classList.remove('hidden');
         cCat.classList.remove('hidden');
+        cCat.style.marginTop = '12px';
         document.getElementById('active-panel-heading').innerText = 'Dual Split Workstation (Chart + Matrix)';
       }
 
