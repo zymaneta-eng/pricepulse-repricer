@@ -33,7 +33,8 @@ st.markdown("""
     iframe {
         border: none !important;
         width: 100% !important;
-        min-height: 100vh !important;
+        height: 100vh !important;
+        min-height: 980px !important;
         display: block !important;
     }
     .stApp {
@@ -47,6 +48,6 @@ html_file = Path(__file__).resolve().parent / "index.html"
 if html_file.exists():
     with open(html_file, "r", encoding="utf-8") as f:
         html_code = f.read()
-    components.html(html_code, height=940, scrolling=True)
+    components.html(html_code, height=980, scrolling=True)
 else:
     st.error("index.html not found. Please verify project repository.")

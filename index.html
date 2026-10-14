@@ -104,7 +104,7 @@
     }
   </style>
 </head>
-<body class="bg-[#0B0F19] text-[#F8FAFC] select-none text-[13px] m-0 p-0 overflow-hidden h-screen w-screen">
+<body class="bg-[#0B0F19] text-[#F8FAFC] select-none text-[13px] m-0 p-0 min-h-screen w-full flex flex-col overflow-y-auto">
 
   <!-- TOAST NOTIFICATION CONTAINER -->
   <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
@@ -1268,12 +1268,36 @@
       if (footerSync) footerSync.innerHTML = `P95 Cycle: <span class="text-[#38BDF8] font-bold">840ms</span>`;
     }
 
-    // Initialize App
-    window.addEventListener('DOMContentLoaded', () => {
-      lucide.createIcons();
-      selectProduct(currentSelectedSku);
-      renderCatalogRows();
-    });
+    // Initialize App with robust state detection
+    function initPricePulseApp() {
+      try {
+        if (window.lucide && typeof lucide.createIcons === 'function') {
+          lucide.createIcons();
+        }
+      } catch (e) {
+        console.warn('Lucide init warning:', e);
+      }
+      try {
+        if (typeof selectProduct === 'function') {
+          selectProduct(currentSelectedSku);
+        }
+        if (typeof renderCatalogRows === 'function') {
+          renderCatalogRows();
+        }
+      } catch (e) {
+        console.error('App init error:', e);
+      }
+    }
+
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      setTimeout(initPricePulseApp, 20);
+    } else {
+      window.addEventListener('DOMContentLoaded', initPricePulseApp);
+      window.addEventListener('load', initPricePulseApp);
+    }
+    // Safety guarantees for iframe execution
+    setTimeout(initPricePulseApp, 100);
+    setTimeout(initPricePulseApp, 400);
   </script>
 </body>
 </html>
