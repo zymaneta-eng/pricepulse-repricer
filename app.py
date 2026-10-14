@@ -141,6 +141,11 @@ engine = RepricingEngine(rule=rule)
 evaluated_records = []
 for _, row in df_catalog_raw.iterrows():
     res = engine.evaluate_product(row.to_dict())
+    comp_a = float(row.get("competitor_a_price", 0.0))
+    comp_b = float(row.get("competitor_b_price", 0.0))
+    comps = [p for p in [comp_a, comp_b] if p > 0]
+    lowest_comp = min(comps) if comps else float(row.get("current_price", 0.0))
+
     rec = {
         "sku": row.get("sku", ""),
         "brand": row.get("brand", ""),
@@ -149,15 +154,15 @@ for _, row in df_catalog_raw.iterrows():
         "stock": row.get("stock", 0),
         "cost_price": float(row.get("cost_price", 0.0)),
         "current_price": float(row.get("current_price", 0.0)),
-        "lowest_comp": res.get("lowest_comp_price", 0.0),
+        "lowest_comp": lowest_comp,
         "target_reprice": res.get("recommended_price", float(row.get("current_price", 0.0))),
         "floor_price": res.get("floor_price", 0.0),
-        "price_change": res.get("price_change", 0.0),
-        "margin_usd": res.get("net_margin_usd", 0.0),
-        "margin_pct": res.get("net_margin_percent", 0.0),
+        "price_change": res.get("price_diff", 0.0),
+        "margin_usd": res.get("new_margin_dollar", 0.0),
+        "margin_pct": res.get("new_margin_pct", 0.0),
         "action": res.get("action", ""),
         "status_badge": res.get("status_badge", "HOLD"),
-        "reasoning": res.get("reasoning", "")
+        "reasoning": res.get("reason", "")
     }
     evaluated_records.append(rec)
 
@@ -188,7 +193,7 @@ st.markdown("""
 
 # Executive Metrics
 total_skus = len(df_evaluated)
-winning_skus = len(df_evaluated[df_evaluated["status_badge"] == "WINNING"])
+winning_skus = len(df_evaluated[df_evaluated["status_badge"].isin(["OPTIMAL", "UNDERCUT", "OPTIMIZED", "SURGE"])])
 avg_margin = df_evaluated["margin_pct"].mean() if not df_evaluated.empty else 0.0
 total_portfolio_cost = (df_evaluated["cost_price"] * df_evaluated["stock"]).sum()
 
@@ -244,21 +249,28 @@ if df_history is not None and not df_history.empty:
     hist_sub = df_history[df_history["sku"] == sample_sku].sort_values("date")
 
     fig = go.Figure()
-    fig.add_trace(go.Scatter(
-        x=hist_sub["date"], y=hist_sub["our_price"],
-        mode="lines+markers", name="Our Store",
-        line=dict(color="#38BDF8", width=3)
-    ))
-    fig.add_trace(go.Scatter(
-        x=hist_sub["date"], y=hist_sub["competitor_a_price"],
-        mode="lines+markers", name="Amazon US",
-        line=dict(color="#F59E0B", width=2, dash="dash")
-    ))
-    fig.add_trace(go.Scatter(
-        x=hist_sub["date"], y=hist_sub["competitor_b_price"],
-        mode="lines+markers", name="Best Buy",
-        line=dict(color="#10B981", width=2, dash="dot")
-    ))
+    our_price_col = "our_price" if "our_price" in hist_sub.columns else "price"
+    comp_a_col = "comp_a_price" if "comp_a_price" in hist_sub.columns else "competitor_a_price"
+    comp_b_col = "comp_b_price" if "comp_b_price" in hist_sub.columns else "competitor_b_price"
+
+    if our_price_col in hist_sub.columns:
+        fig.add_trace(go.Scatter(
+            x=hist_sub["date"], y=hist_sub[our_price_col],
+            mode="lines+markers", name="Our Store",
+            line=dict(color="#38BDF8", width=3)
+        ))
+    if comp_a_col in hist_sub.columns:
+        fig.add_trace(go.Scatter(
+            x=hist_sub["date"], y=hist_sub[comp_a_col],
+            mode="lines+markers", name="Amazon US",
+            line=dict(color="#F59E0B", width=2, dash="dash")
+        ))
+    if comp_b_col in hist_sub.columns:
+        fig.add_trace(go.Scatter(
+            x=hist_sub["date"], y=hist_sub[comp_b_col],
+            mode="lines+markers", name="Best Buy",
+            line=dict(color="#10B981", width=2, dash="dot")
+        ))
 
     fig.update_layout(
         paper_bgcolor="#121826",
