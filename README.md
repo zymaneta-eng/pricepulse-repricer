@@ -186,9 +186,20 @@ pricepulse-repricer/
 
 ---
 
+## 👩‍💻 Hire the Developer / Контакти для замовлення
+
+Маєте інтернет-магазин (Shopify, Rozetka, Prom.ua, Amazon) і шукаєте систему автоматичної переоцінки товарів, захисту маржі чи підключення до 1C / BAS?
+
+* 💬 **Прямий зв'язок у Telegram:** [@Nataly_Zyma](https://t.me/Nataly_Zyma)
+* 📧 **Офіційний Email:** `areonixwinter@gmail.com`
+* 🤖 **Бот технічної підтримки:** [@AreonixSupport_bot](https://t.me/AreonixSupport_bot)
+* 🏢 **Виконавець:** ФОП Зима Н. М. (офіційний договір, безготівковий розрахунок, еквайринг)
+
+---
+
 ## 💼 Developer Portfolio & Contract Availability
 
-**Author:** Senior Full-Stack & Automation Engineer  
-**Specialization:** Algorithmic E-Commerce Infrastructure, Scraping & WAF Bypass Pipelines, High-Density Financial Terminals, and Marketplace Integrations (Shopify, Amazon SP-API, Walmart Marketplace).
+**Author:** Nataliia Zyma (Senior Automation & E-Commerce Engineer)  
+**Specialization:** Algorithmic E-Commerce Infrastructure, Scraping & WAF Bypass Pipelines, High-Density Financial Terminals, and Marketplace Integrations (Shopify, Amazon SP-API, Prom, Rozetka).
 
-*Available for custom contract engagements and consulting via Upwork.*
+*Available for custom contract engagements, integrations, and turnkey development.*
